@@ -1,22 +1,53 @@
-# ScoilMate: prioritised implementation backlog
-A minimal branded landing page, /health and static branding are implemented and smoke-tested via run_local_testing. No learning, identity, database or admin features below are implemented. Order is dependency-driven; estimates await decisions.
+# ScoilMate: roadmap and acceptance checks
 
-| Priority / ID | Deliverable | Acceptance checks |
+Revised 2026-11-14 with Dave: deliver a clickable learning loop first, then add storage, accounts, reports and the review workflow. Research inputs: [competitor features](research/competitor-features.md), [exam paper analysis](research/exam-paper-analysis.md), [learning design guidance](research/learning-design-guidance.md) (step details below are refined once these land).
+
+## Status
+
+| Step | Deliverable | Status |
 |---|---|---|
-| P0 D1 | Agree audience, pilot, controller, Gaeilge track/levels and storage interpretation | Dave records decisions; no student onboarding with unresolved controller/lawful basis. |
-| P0 D2 | Current curriculum/text register and reviewers | Teacher verifies full current specs, outcome mappings, text cohorts; search-only details resolved; content has review identities/dates/rights. |
-| P0 D3 | Privacy and safeguarding design | DPIA screening, age-appropriate notices, retention, recovery, adult contact and data-flow approved; synthetic accounts only until ready. |
-| P0 F1 | Dependencies and app foundation | Supported Python/deps locked; local-only FastAPI page and tests; no secrets/default admin; licence/advisory review. |
-| P0 F2 | SQLAlchemy/Alembic schema | FK checks enabled; populated migration roundtrip/recovery; invalid option/version rejected; backup restores; immutable version tests. |
-| P0 A1 | Auth, roles, sessions and CSRF | Student cannot reach admin/other student; cookie flags, rotation/expiry/revocation, generic failures, CSRF missing/wrong rejected on every unsafe endpoint; recovery token single-use. |
-| P0 C1 | Admin author/review/publish | Draft invisible to students; publishing requires review and valid question/lesson/eligibility; edit produces new version; retired version excluded from new quizzes but old attempts render. |
-| P0 L1 | Learn → quiz → feedback | Keyboard/mobile student completes topic; pre-submit payload contains no key; server grades; hints recorded; explanation/help match pinned versions. |
-| P0 Q1 | Durable attempts | Duplicate submit returns same response; conflicting retry 409; interrupted/restarted server preserves state; mixed ownership/track tampering rejected. |
-| P0 P1 | Transparent progress | Independent vs assisted counts distinct; abandoned items excluded; deterministic rebuild matches cache; topic suggestions not grades. |
-| P0 R1 | Pilot release gate | 30-concurrent proposed burst target tested; no lost responses; rate-limit 429; XSS/IDOR/CSRF checks; restore drill; rights/export/erase including backup policy; assistive tech/manual Gaeilge checks. |
-| P1 C2 | Expand reviewed content | Agree 3 topics/subject and 5–10 questions/topic; no unsupported full-curriculum claim; balance distractors and review ambiguity. |
-| P1 P2 | Revisit scheduling | Simple explainable reminders within app, opt-in; no manipulative pressure; algorithm versioned. |
-| P2 | Rich audio, short responses, school grouping, H5P | Separate requirements/security/privacy work; no implicit expansion of admin access. |
-| Later | GitHub and production | Explicit Dave authorisation; licence/secret/content checks; hosting plan and rollback signed off before configuration changes. |
+| 0 | Initial commit; README paths corrected | **Done** |
+| 1 | Practice slice (no DB): topic notes → questions → hints → server-graded feedback → session summary; thumbs up/down ratings | **Done — ready to test** |
+| 2 | Show to a teacher/student, adjust | Next (Dave) |
+| 3 | Decisions D1/D2: cohort, Gaeilge track/levels, reviewers, pilot topics | Open (Dave) |
+| 4 | Storage: SQLite + SQLAlchemy + Alembic for content, attempts, ratings | Planned |
+| 5 | Accounts: admin + student roles, sessions, CSRF; **admin adds/removes students** | Planned |
+| 6 | Reports: **student "My progress"** and **admin per-student and class progress reports** | Planned |
+| 7 | Admin content authoring/review/publish; ratings review queue; more content | Planned |
+| 8 | Privacy/safeguarding sign-off and pilot release gate | Planned |
 
-Test pyramid: stdlib fixture checks now; later unit tests for eligibility/grading/progress, database integration for constraints/migrations/locks/idempotency, HTTP tests for every permission/CSRF case, browser tests for complete journeys and accessibility, manual subject review. No tests against real minors' data.
+## Acceptance checks
+
+**Step 1 — practice slice (done)**
+- Question page contains no answer key or explanation before submit (tested for every question); hints revealed one at a time on request.
+- Server grades; invalid option 400; missing answer re-prompts; first answer counts, retries are practice only.
+- Summary distinguishes correct-on-own, correct-with-hints and to-review; links each to its topic note. Not a grade.
+- State in a signed, httpOnly, SameSite=Strict cookie only; tampered cookie ignored; nothing about the learner stored server-side.
+- Ratings: 👍/👎 plus optional fixed reason (no free text, so no personal data) for questions and notes; stored anonymously with item id + version; one rating per item per browser; `tools/feedback_report.py` summarises.
+- Gaeilge text marked `lang="ga"`; keyboard usable; security headers incl. CSP.
+
+**Step 4 — storage**
+- FK checks on; migration up/down on populated DB; content versions immutable; attempts pin question/hint/lesson version; backup + restore drill.
+- Ratings move from JSONL to a table (import existing file).
+
+**Step 5 — accounts and student management**
+- Roles: admin, student. Admin can **add a student** (display name/pseudonym, year, subject tracks/levels — minimal data), **deactivate/remove a student**, reset access. Removal: deactivate first; hard delete erases attempts and ratings links per retention policy; action audited.
+- No public registration. Student cannot reach admin pages or any other student's data (IDOR tests). CSRF on every POST. Cookie flags, rotation, expiry, generic login errors, rate-limited login.
+
+**Step 6 — progress reports**
+- **Student "My progress":** per subject/topic: questions tried, correct on own vs with hints, topics to revisit, recent activity; own data only; supportive wording, no grade prediction or ranking against others.
+- **Admin student report:** same per-student view plus activity over time, hint use, topics needing review, content ratings given; **class overview** table (student × topic) with filters by subject/track/year; CSV export.
+- Reports cover every activity type added later (quizzes, lessons read, revisit sessions, future writing/self-assessment tasks) through a common activity log, so new approaches appear without redesign.
+- Deterministic: report rebuilt from attempts equals cached figures.
+
+**Step 7 — content workflow**
+- Draft invisible to students; publish requires review; edit creates new version; retired versions excluded from new quizzes, old attempts still render.
+- Ratings queue: items sorted by 👎 and reason; admin can mark resolved with new version.
+
+**Step 8 — pilot gate**
+- 30-concurrent burst; no lost responses; 429 rate limits; XSS/IDOR/CSRF checks; restore drill; export/erase; accessibility and manual Gaeilge checks; DPIA screening and notices approved.
+
+## Later
+More reviewed content (3+ topics/subject, 5–10 questions/topic); spaced revisit reminders (opt-in, explainable); P2: audio/listening, short answers, school groups, H5P; GitHub and production hosting only with Dave's explicit sign-off.
+
+Test pyramid: content fixture checks and HTTP tests now (`tools/test_*.py`); DB integration, permission matrix and browser/accessibility tests as steps land. Never test with real minors' data.

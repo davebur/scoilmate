@@ -1,10 +1,10 @@
 # ScoilMate — planning repository
 
-**Status:** planning plus a minimal local preview · **Checked:** 14 November 2026 · **Owner:** Dave (decisions pending)
+**Status:** planning plus a local practice preview (step 1 of the [roadmap](docs/07-backlog-and-acceptance.md)) · **Checked:** 14 November 2026 · **Owner:** Dave (decisions pending)
 
 A proposed Irish Junior Cycle learning website for **English, Gaeilge and History**: learn a short topic, try original practice questions, request hints, understand feedback, and revisit topics. “Junior Certificate” is a useful legacy search term; the product should use **Junior Cycle** for the current programme.
 
-This contains a **minimal branded FastAPI preview**, not an implemented learning application, a complete curriculum, an official NCCA/SEC resource, or a full exam simulator. Preview dependencies were installed only in project `.venv`; a temporary owned Uvicorn process was smoke-tested and stopped. No nginx changes, GitHub repository creation or production deployment occurred. All sample teaching material is **original, draft and unreviewed** and must not be offered to students as approved content.
+This contains a **FastAPI practice preview** (topic notes, questions with hints, server-side marking, session summary, anonymous 👍/👎 content ratings), not an implemented learning application, a complete curriculum, an official NCCA/SEC resource, or a full exam simulator. Preview dependencies were installed only in project `.venv`; a temporary owned Uvicorn process was smoke-tested and stopped. No nginx changes, GitHub repository creation or production deployment occurred. All sample teaching material is **original, draft and unreviewed** and must not be offered to students as approved content.
 
 ## Recommended direction
 
@@ -60,7 +60,7 @@ RELOAD=1 ./run_local_testing
 ~/coding/scoilmate/run_local_testing
 ```
 
-Open `http://127.0.0.1:8000/`, `/health`, and `/static/branding/favicon.ico`. Launcher prints discovered host/LAN address candidates; isolation/container networking, bind address and firewall can make those unreachable from your LAN. No firewall/public route is configured. Stop with Ctrl-C. Production remains HTTPS behind nginx, separately approved. There is no authentication, database, quiz UI or student data capture. Do not use real student data.
+Open `http://127.0.0.1:8000/` and choose **Start practising**. Launcher prints discovered host/LAN address candidates; isolation/container networking, bind address and firewall can make those unreachable from your LAN. No firewall/public route is configured. Stop with Ctrl-C. Production remains HTTPS behind nginx, separately approved. There is no login or database: quiz progress lives only in a signed browser cookie for a few hours and resets when the server restarts. Anonymous ratings are appended to git-ignored `instance/content-feedback.jsonl`; summarise with `python3 tools/feedback_report.py`. Do not use real student data.
 
 Repeat the owned-process smoke test (starts a server on a temporary loopback port, then stops only that process):
 
@@ -78,7 +78,7 @@ Content checks use dependency-free Python. The preview also has a temporary-serv
 
 ```sh
 python3 tools/validate_content.py
-python3 -m unittest discover -s tools -p 'test_*.py' -v
+.venv/bin/python -m unittest discover -s tools -p 'test_*.py' -v   # content + HTTP tests
 git diff --check
 git diff --cached --check
 ```

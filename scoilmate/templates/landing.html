@@ -1,0 +1,12 @@
+{% extends "base.html" %}{% block title %}Junior Cycle learning preview{% endblock %}
+{% block content %}
+<header class="hero"><img src="/static/branding/scoilmate-icon-192.png" alt="ScoilMate book and shamrock logo" width="100" height="100"><div><h1>ScoilMate</h1><p>Your Junior Cycle learning companion</p></div></header>
+<p class="notice"><strong>Preview — not ready for student use.</strong> The practice questions are original drafts that have not yet been reviewed by teachers. Please don't enter personal information.</p>
+<h2>Learn. Practise. Understand.</h2>
+<p>Read a short topic note, try practice questions, use hints if you're stuck, and see a clear explanation after every answer.</p>
+<p><a class="button" href="/practice">Start practising</a></p>
+<section class="grid" aria-label="Subjects">
+{% for s in strands %}<article><h3 lang="{{ s.lang }}">{{ s.title }}</h3><p><a href="/practice/{{ s.slug }}">Open {{ s.title }}</a></p></article>{% endfor %}
+</section>
+<p class="small"><a href="/health">Check preview health</a></p>
+{% endblock %}
