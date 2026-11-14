@@ -2,7 +2,9 @@
 Planning schema, not executable migration. UUID text IDs at boundaries; UTC timestamps; explicit CHECK/UNIQUE/FK constraints and application validation. Never persist passwords/tokens in content fixtures.
 
 ## Identity and curriculum
-- `user(id, login_normalised UNIQUE, display_alias, password_hash, role CHECK admin/student, status, created_at, disabled_at)`; student email/full DOB not required. Role cannot be self-assigned.
+- `user(id, login_normalised UNIQUE, display_alias, password_hash, role CHECK admin/parent/student, status, created_at, disabled_at)`; student email/full DOB not required. Role cannot be self-assigned.
+- `parent_student(parent_id FK user, student_id FK user, created_by FK user, created_at, PRIMARY KEY(parent_id, student_id))`: which parents manage which students; created when a parent adds a student or an admin links them. Parent email (adult contact) on `user`, nullable for students.
+- `audit_log(id, actor_id, action, target_user_id, at, detail)`: add/remove/link/reset/delete events.
 - `student_subject(user_id, subject_id, track, preferred_level, school_year, exam_year nullable)`; UNIQUE user/subject. English track `general`, levels higher/ordinary/undecided; History `general`, common only; Gaeilge T1/T2 plus higher/ordinary/undecided. T1/T2 are not ability levels. School year 1–3 is guidance, not automatic proof of prescribed-text eligibility.
 - `curriculum_release(id, subject, track, title, official_url, checked_at, effective_cohorts, verification_status)`; `learning_outcome(id, release_id, code, paraphrase)` UNIQUE release/code.
 - `topic(id, subject, track, slug)`; `topic_outcome(topic_id, outcome_id, mapping_review_status)`; exact mapping requires educator approval.

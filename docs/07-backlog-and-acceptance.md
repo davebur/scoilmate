@@ -11,8 +11,8 @@ Revised 2026-11-14 with Dave: deliver a clickable learning loop first, then add 
 | 2 | Show to a teacher/student, adjust | Next (Dave) |
 | 3 | Decisions D1/D2: cohort, Gaeilge track/levels, reviewers, pilot topics | Open (Dave) |
 | 4 | Storage: SQLite + SQLAlchemy + Alembic for content, attempts, ratings | Planned |
-| 5 | Accounts: admin + student roles, sessions, CSRF; **admin adds/removes students** | Planned |
-| 6 | Reports: **student "My progress"** and **admin per-student and class progress reports** | Planned |
+| 5 | Accounts: admin, **parent** and student roles, sessions, CSRF; admins add/remove students and parents; parents add and manage their own children | Planned |
+| 6 | Reports: **student "My progress"**, **parent view of each linked child**, **admin per-student and class reports** | Planned |
 | 7 | Admin content authoring/review/publish; ratings review queue; more content | Planned |
 | 8 | Privacy/safeguarding sign-off and pilot release gate | Planned |
 
@@ -36,10 +36,11 @@ What students and admins get, and why. Sources: common features across 18 tools,
 | **Admin assignments** ("practise topic X by date Y", completion tracking) | 9/18 tools | Later (after 6) |
 | **Timed practice / mini-mock** per paper section | 4/18 tools; exam timing gap | Later |
 | **Gaeilge listening** with original recorded audio (not SEC MP3s) | aural is 45–60 marks every year | Later (P2) |
+| **Parent role**: admin adds parents; parents add and manage their own children and see their reports | Dave's request (Seneca has parent-shareable reports) | 5–6 |
 | 👍/👎 content ratings → admin review queue | Dave's request | 1 ✅, queue in 7 |
 | Exam-stress/wellbeing page linking official Irish supports | Bitesize; Dept of Education | 7 |
 
-**Deliberately excluded**, because they conflict with a privacy-first, invite-only app for 13–15-year-olds: leaderboards/leagues, streaks and loss-aversion mechanics (replaced by a private "this week: 3 sessions" tally that resets quietly), push/email nags (opt-in, daytime, max 1/day if ever added), AI tutor/marking, messaging or tutor chat, ads, parent accounts (use admin exports instead), third-party video embeds, grade or descriptor predictions, learning-styles matching, and reproducing SEC papers (write original exam-style items and link to examinations.ie for real papers).
+**Deliberately excluded**, because they conflict with a privacy-first, invite-only app for 13–15-year-olds: leaderboards/leagues, streaks and loss-aversion mechanics (replaced by a private "this week: 3 sessions" tally that resets quietly), push/email nags (opt-in, daytime, max 1/day if ever added), AI tutor/marking, messaging or tutor chat, ads, third-party video embeds, grade or descriptor predictions, learning-styles matching, and reproducing SEC papers (write original exam-style items and link to examinations.ie for real papers).
 
 ## Acceptance checks
 
@@ -55,13 +56,27 @@ What students and admins get, and why. Sources: common features across 18 tools,
 - FK checks on; migration up/down on populated DB; content versions immutable; attempts pin question/hint/lesson version; backup + restore drill.
 - Ratings move from JSONL to a table (import existing file).
 
-**Step 5 — accounts and student management**
-- Roles: admin, student. Admin can **add a student** (display name/pseudonym, year, subject tracks/levels — minimal data), **deactivate/remove a student**, reset access. Removal: deactivate first; hard delete erases attempts and ratings links per retention policy; action audited.
-- No public registration. Student cannot reach admin pages or any other student's data (IDOR tests). CSRF on every POST. Cookie flags, rotation, expiry, generic login errors, rate-limited login.
+**Step 5 — accounts, parents and student management**
+- Roles: **admin**, **parent**, **student**. Each student is managed by one or more linked parents (a `parent_student` link).
+
+| Action | Admin | Parent | Student |
+|---|---|---|---|
+| Add a student | ✅ any (optionally link to parents) | ✅ automatically linked to themselves | ❌ |
+| Add a parent | ✅ | ❌ | ❌ |
+| Link/unlink a parent and a student | ✅ | ❌ (prevents claiming someone else's child) | ❌ |
+| Edit student settings (year, subjects, Gaeilge track/level), reset access | ✅ any | ✅ own children only | own year/subjects only |
+| Deactivate a student | ✅ any | ✅ own children only | ❌ |
+| Permanently delete a student and their data | ✅ (audited) | requests it; admin confirms | ❌ |
+| Remove a parent | ✅ (their children stay; any child left without a parent is flagged for admin) | ❌ | ❌ |
+| See progress reports | all students + class overview | own children only | own only |
+
+- Minimal data: student alias, year, subject tracks/levels. Parent: name and email for login/recovery (adult contact). No student email required.
+- No public registration. Parents are invited by an admin and add students from inside their own account. A student cannot reach parent/admin pages; a parent cannot reach another family's student or any admin page (IDOR tests for every role pair). CSRF on every POST. Cookie flags, rotation, expiry, generic login errors, rate-limited login. Every add, remove, link and reset is recorded in an audit log.
 
 **Step 6 — progress, revisit and reports**
 - Mastery levels, revisit ladder, mixed reviews, mistake review and confidence prompts as specified in [learning design guidance §3](research/learning-design-guidance.md); every level shows the rule that produced it.
 - **Student "My progress":** per subject/topic: level and why, what's due and when, recent sessions, correct on own vs with hints (neutral wording), confidence vs result, suggested next step. Own data only; no class averages, rankings or grade predictions.
+- **Parent report:** the student report for each linked child, plus last active date and a simple weekly activity count. No class comparison, other children or rankings. Private reflections and notes stay private to the student, and the student's report tells them which parts their parent can see.
 - **Admin student report:** the same per-student view plus activity over time, overdue reviews, topics most often missed, last active date. **Class overview** (student × topic level) filtered by subject/track/year; question stats (% correct, most-chosen wrong option, hint use); CSV/printable export. Admins never see private reflection text or time-of-day detail beyond aggregates.
 - Reports cover every activity type added later (quizzes, lessons read, revisit sessions, future writing/self-assessment tasks) through a common activity log, so new approaches appear without redesign.
 - Deterministic: report rebuilt from attempts equals cached figures.
