@@ -1,20 +1,19 @@
 {% extends "base.html" %}{% block title %}Question {{ n }}{% endblock %}
 {% block content %}
-<p class="crumbs"><a href="/practice">Practice</a> › <a href="/practice/{{ strand.slug }}" lang="{{ strand.lang }}">{{ strand.title }}</a> › Question {{ n }} of {{ total }}</p>
-{% if thanks %}<p class="thanks" role="status">Thanks for your feedback!</p>{% endif %}
+<p class="crumbs"><a href="/practice">Practice</a> › {{ title }} › Question {{ n }} of {{ total }}</p>
+{% with draft=q.draft %}{% include "_draft.html" %}{% endwith %}
+{% if take_break %}<p class="notice">You've been at this a while. A short break helps: stretch, get a drink, then carry on.</p>{% endif %}
 <progress value="{{ n - 1 }}" max="{{ total }}" aria-label="Question {{ n }} of {{ total }}"></progress>
-<form method="post" action="/practice/{{ strand.slug }}/q/{{ n }}" class="question" lang="{{ strand.lang }}">
-{% include "_csrf.html" %}
-<fieldset><legend><span class="qn">Question {{ n }}</span> {{ q.prompt }}</legend>
+<form method="post" action="/practice/set/{{ ps.id }}/q/{{ n }}" class="question" lang="{{ lang }}">{% include "_csrf.html" %}
+<fieldset><legend><span class="qn" lang="en">Question {{ n }}</span> {{ q.prompt }}</legend>
 {% if error %}<p class="error" role="alert" lang="en">{{ error }}</p>{% endif %}
 {% for o in q.options %}<label class="option"><input type="radio" name="option" value="{{ o.id }}"> <b>{{ o.id }}</b> {{ o.text }}</label>{% endfor %}
 </fieldset>
-<input type="hidden" name="hints_used" value="{{ hints_shown }}">
-<button class="button">Check answer</button>
+<button class="button" lang="en">Check answer</button>
 </form>
-<section class="hints" aria-label="Hints">
-{% for h in q.hints %}<p class="hint" lang="{{ strand.lang }}"><b lang="en">Hint {{ loop.index }}:</b> {{ h }}</p>{% endfor %}
-{% if hints_shown < q.hints_total %}<p><a href="/practice/{{ strand.slug }}/q/{{ n }}?hints={{ hints_shown + 1 }}">Stuck? Show {% if hints_shown %}another{% else %}a{% endif %} hint</a> <span class="small">(try first — it helps you remember)</span></p>{% endif %}
-<p class="small"><a href="/practice/{{ strand.slug }}/lesson/{{ q.help_lesson_id }}?back={{ n }}">Read the topic note</a></p>
+<section class="hints" id="hints" aria-label="Hints">
+{% for h in q.hints %}<p class="hint" lang="{{ lang }}"><b lang="en">Hint {{ loop.index }}:</b> {{ h }}</p>{% endfor %}
+{% if q.hints|length < q.hints_total and not item.response %}<form method="post" action="/practice/set/{{ ps.id }}/q/{{ n }}/hint">{% include "_csrf.html" %}<button class="linkbutton">Stuck? Show {% if q.hints %}another{% else %}a{% endif %} hint</button> <span class="small">(try first: it helps you remember)</span></form>{% endif %}
+{% if item.lesson %}<p class="small"><a href="/practice/set/{{ ps.id }}/q/{{ n }}/note">Read the topic note</a></p>{% endif %}
 </section>
 {% endblock %}

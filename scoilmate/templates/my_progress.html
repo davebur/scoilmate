@@ -1,0 +1,8 @@
+{% extends "base.html" %}{% block title %}My progress{% endblock %}
+{% block content %}
+<h1>My progress</h1>
+{% include "_report.html" %}
+<section class="card"><h2>Who can see this?</h2>
+<p>Your parent (and the site admin) can see your topic levels, review dates, session results, confidence ratings and how active you've been. <b>Your private notes are only shown to you.</b> Ratings (👍/👎) are anonymous.</p>
+<p><a href="/progress/export.json">Download all my data (JSON)</a></p></section>
+{% endblock %}

@@ -1,16 +1,17 @@
 {% extends "base.html" %}{% block title %}Feedback · question {{ n }}{% endblock %}
 {% block content %}
-<p class="crumbs"><a href="/practice">Practice</a> › <a href="/practice/{{ strand.slug }}" lang="{{ strand.lang }}">{{ strand.title }}</a> › Question {{ n }} of {{ total }}</p>
+<p class="crumbs"><a href="/practice">Practice</a> › {{ title }} › Question {{ n }} of {{ total }}</p>
 <progress value="{{ n }}" max="{{ total }}" aria-label="{{ n }} of {{ total }} done"></progress>
 <section class="result {{ 'ok' if result.correct else 'review' }}" role="status">
-<h1>{% if result.correct %}Correct{% if hints_used %} — with {{ hints_used }} hint{{ 's' if hints_used > 1 }}{% endif %}{% else %}Not this time{% endif %}</h1>
-<p lang="{{ strand.lang }}">{{ q.prompt }}</p>
-{% if not result.correct %}<p>You chose <b>{{ result.chosen }}</b>: <span lang="{{ strand.lang }}">{{ result.chosen_text }}</span></p>{% endif %}
-<p>Answer: <b>{{ result.correct_option_id }}</b> — <span lang="{{ strand.lang }}">{{ result.correct_text }}</span></p>
-<p class="why" lang="{{ strand.lang }}"><b lang="en">Why:</b> {{ result.explanation }}</p>
-{% if not result.correct %}<p>Mistakes are useful — they show what to revisit. Read <a href="/practice/{{ strand.slug }}/lesson/{{ lesson.id }}?back={{ n }}" lang="{{ strand.lang }}">{{ lesson.title }}</a>, then try again later.</p>{% endif %}
-{% if not first_attempt %}<p class="small">You've answered this before; your first answer is the one that counts in your summary.</p>{% endif %}
+<h1>{% if result.correct %}Correct{% if hints_used %}, with {{ hints_used }} hint{{ 's' if hints_used > 1 }}{% endif %}{% else %}Not this time{% endif %}</h1>
+<p lang="{{ lang }}">{{ q.prompt }}</p>
+{% if not result.correct %}<p>You chose <b>{{ result.chosen }}</b>: <span lang="{{ lang }}">{{ result.chosen_text }}</span></p>{% endif %}
+<p>Answer: <b>{{ result.correct_option_id }}</b>: <span lang="{{ lang }}">{{ result.correct_text }}</span></p>
+<p class="why" lang="{{ lang }}"><b lang="en">Why:</b> {{ result.explanation }}</p>
+{% if result.correct and hints_used %}<p class="small">Using a hint and then getting it right is how this works. Hints just mean this topic comes back for review a bit sooner.</p>{% endif %}
+{% if not result.correct %}<p>Mistakes are useful: they show what to revisit.{% if lesson %} Read <a href="/practice/set/{{ ps.id }}/q/{{ n }}/note" lang="{{ lang }}">{{ lesson.data.title }}</a>, then carry on.{% endif %} It will also appear in "Redo my wrong answers".</p>{% endif %}
+{% if not first %}<p class="small">You've answered this before; your first answer is the one that counts.</p>{% endif %}
 </section>
-{% with item_type='question', item_id=q.id %}{% include "_rate.html" %}{% endwith %}
-<p>{% if n < total %}<a class="button" href="/practice/{{ strand.slug }}/q/{{ n + 1 }}">Next question</a>{% else %}<a class="button" href="/practice/{{ strand.slug }}/summary">See how you did</a>{% endif %}</p>
+{% with version=item.question, back='/practice/set/' ~ ps.id ~ '/q/' ~ n %}{% include "_rate.html" %}{% endwith %}
+<p>{% if n < total %}<a class="button" href="/practice/set/{{ ps.id }}/q/{{ n + 1 }}">Next question</a>{% else %}<form method="post" action="/practice/set/{{ ps.id }}/finish" class="inline">{% include "_csrf.html" %}<button class="button">See how you did</button></form>{% endif %}</p>
 {% endblock %}

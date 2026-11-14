@@ -1,0 +1,11 @@
+{% extends "base.html" %}{% block title %}Question stats{% endblock %}
+{% block content %}
+<p class="crumbs"><a href="/admin/reports">Reports</a> › Question stats</p>
+<h1>Question stats</h1>
+<form method="get" action="/admin/reports/questions" class="card filters"><label>Subject <select name="subject"><option value="">All</option>{% for code, info in SUBJECTS.items() %}<option value="{{ code }}" {{ 'selected' if subject == code }}>{{ info.name }}</option>{% endfor %}</select></label>
+<button class="button secondary">Show</button> <a href="/admin/reports/questions.csv?subject={{ subject }}">Download CSV</a></form>
+<table><thead><tr><th scope="col">Question</th><th scope="col">Topic</th><th scope="col">First answers</th><th scope="col">% correct</th><th scope="col">Most-chosen wrong option</th><th scope="col">% used hints</th><th scope="col">Avg hints</th></tr></thead><tbody>
+{% for r in rows %}<tr><td><a href="/admin/content/{{ r.slug }}">{{ r.slug }}</a> v{{ r.version.version }}<br><span class="small">{{ r.version.title }}</span></td><td>{{ r.topic }}</td><td>{{ r.n }}</td><td>{{ r.pct_correct }}%</td><td class="small">{{ r.top_wrong }}</td><td>{{ r.pct_hinted }}%</td><td>{{ r.avg_hints }}</td></tr>
+{% else %}<tr><td colspan="7">No answers yet.</td></tr>{% endfor %}</tbody></table>
+<p class="small">First answers only; retries are practice and not counted.</p>
+{% endblock %}

@@ -1,12 +1,12 @@
 {% extends "base.html" %}{% block title %}Junior Cycle learning preview{% endblock %}
 {% block content %}
 <header class="hero"><img src="/static/branding/scoilmate-icon-192.png" alt="ScoilMate book and shamrock logo" width="100" height="100"><div><h1>ScoilMate</h1><p>Your Junior Cycle learning companion</p></div></header>
-<p class="notice"><strong>Preview — not ready for student use.</strong> The practice questions are original drafts that have not yet been reviewed by teachers. Please don't enter personal information.</p>
+<p class="notice"><strong>Preview, not ready for student use.</strong> The practice questions are original drafts that teachers have not reviewed yet. Use made-up names only, never real student details.</p>
 <h2>Learn. Practise. Understand.</h2>
-<p>Read a short topic note, try practice questions, use hints if you're stuck, and see a clear explanation after every answer.</p>
-<p><a class="button" href="/practice">Start practising</a></p>
+<p>Read a short topic note, try practice questions, use hints if you're stuck, and see a clear explanation after every answer. Topics come back for review at growing gaps so they stick.</p>
+<p>{% if user %}<a class="button" href="{{ {'student': '/practice', 'parent': '/parent', 'admin': '/admin'}[user.role] }}">Go to my page</a>{% else %}<a class="button" href="/login">Log in</a>{% endif %}</p>
 <section class="grid" aria-label="Subjects">
-{% for s in strands %}<article><h3 lang="{{ s.lang }}">{{ s.title }}</h3><p><a href="/practice/{{ s.slug }}">Open {{ s.title }}</a></p></article>{% endfor %}
+{% for s in strands %}<article><h3 lang="{{ s.lang }}">{{ s.title }}</h3></article>{% endfor %}
 </section>
-<p class="small"><a href="/health">Check preview health</a></p>
+<p class="small">Accounts are invite-only: a parent or the site admin creates them. <a href="/wellbeing">Exam stress and wellbeing supports</a> · <a href="/health">Preview health</a></p>
 {% endblock %}

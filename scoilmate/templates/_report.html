@@ -1,0 +1,19 @@
+{# r = reports.student_report(...). Dates only: no time-of-day detail. #}
+<p class="small">Levels describe practice on ScoilMate only. They are not exam grades or predictions.</p>
+{% if r.audience != 'student' %}<ul class="stats"><li>Last active: <b>{{ r.last_active|date }}</b></li><li>This week: <b>{{ r.week_count }}</b> session{{ '' if r.week_count == 1 else 's' }}</li>{% if r.audience == 'admin' %}<li>Ready to revisit: <b>{{ r.overdue }}</b></li>{% endif %}</ul>
+{% else %}<p>This week: <b>{{ r.week_count }}</b> session{{ '' if r.week_count == 1 else 's' }}.</p>{% endif %}
+<p class="card"><b>Suggested next step:</b> {{ r.suggestion }}</p>
+{% for row in r.strands %}
+<table><caption><span lang="{{ row.strand.lang }}">{{ row.strand.title }}</span> · {{ row.secure_pct }}% of topics Proficient or Mastered</caption>
+<thead><tr><th scope="col">Topic</th><th scope="col">Level</th><th scope="col">Why</th><th scope="col">Review</th></tr></thead><tbody>
+{% for t in row.topics %}<tr><td lang="{{ row.strand.lang }}">{{ t.topic.title }}</td><td>{% with level=t.level, label=t.label %}{% include "_level.html" %}{% endwith %}</td><td class="small">{{ t.reason }}</td><td class="small {{ 'amber' if t.ready }}">{{ t.due_text or '—' }}</td></tr>{% endfor %}
+</tbody></table>
+{% else %}<p>No subjects chosen yet.</p>{% endfor %}
+<h2>Answers so far</h2>
+<p>{{ r.totals.own }} right first time on {{ 'your' if r.audience == 'student' else 'their' }} own · {{ r.totals.hinted }} right with hints · {{ r.totals.review }} to look at again{% if r.mistakes %} ({{ r.mistakes }} in the "redo my wrong answers" list){% endif %}. Using hints is part of learning.</p>
+<table><caption>Recent sessions</caption><thead><tr><th scope="col">Date</th><th scope="col">What</th><th scope="col">Result</th><th scope="col">Confidence before</th>{% if r.audience == 'student' %}<th scope="col">My note (private)</th>{% endif %}</tr></thead><tbody>
+{% for s in r.recent %}<tr><td>{{ s.date|date }}</td><td>{{ s.kind }}: {{ s.title }}</td><td>{{ s.summary.own }} own, {{ s.summary.hinted }} with hints, {{ s.summary.review }} to review</td><td>{{ s.confidence or '—' }}</td>{% if r.audience == 'student' %}<td class="small">{{ s.reflection or '' }}</td>{% endif %}</tr>
+{% else %}<tr><td colspan="5">No sessions yet.</td></tr>{% endfor %}</tbody></table>
+{% if r.weekly %}<table><caption>Weekly activity</caption><thead><tr><th scope="col">Week of</th><th scope="col">Practice sessions</th><th scope="col">Topic notes read</th></tr></thead><tbody>
+{% for w in r.weekly %}<tr><td>{{ w.week_of|date }}</td><td>{{ w.sessions }}</td><td>{{ w.notes }}</td></tr>{% endfor %}</tbody></table>{% endif %}
+{% if r.audience == 'admin' %}<h2>Topics most often missed</h2><ul>{% for t, n in r.most_missed %}<li>{{ t.title }}: {{ n }} wrong first answer{{ '' if n == 1 else 's' }}</li>{% else %}<li>None yet.</li>{% endfor %}</ul>{% endif %}

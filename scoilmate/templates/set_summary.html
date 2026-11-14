@@ -1,0 +1,21 @@
+{% extends "base.html" %}{% block title %}How you did{% endblock %}
+{% block content %}
+<p class="crumbs"><a href="/practice">Practice</a> › {{ title }} › Summary</p>
+<h1>How you did</h1>
+<ul class="stats">
+<li><b>{{ summ.answered }}</b> of {{ summ.total }} tried</li>
+<li><b>{{ summ.own }}</b> right first time on your own</li>
+<li><b>{{ summ.hinted }}</b> right with hints</li>
+<li><b>{{ summ.review }}</b> to look at again</li>
+</ul>
+{% if confidence %}<p class="card">Before you started you felt <b>“{{ confidence }}”</b> confident, and you got <b>{{ summ.own + summ.hinted }} of {{ summ.answered }}</b> right. {% if summ.answered %}Noticing how that compares helps you choose what to practise next.{% endif %}</p>{% endif %}
+{% if changes %}<table><caption>Your topics now</caption><thead><tr><th scope="col">Topic</th><th scope="col">Level</th><th scope="col">Why</th><th scope="col">Next review</th></tr></thead><tbody>
+{% for c in changes %}<tr><td>{{ c.topic.title }}</td><td>{{ c.label }}</td><td class="small">{{ c.reason }}</td><td>{{ c.due }}</td></tr>{% endfor %}</tbody></table>{% endif %}
+<p class="small">{{ credit_rule }} This is practice, not a grade.</p>
+<form method="post" action="/practice/set/{{ ps.id }}/next" class="card">{% include "_csrf.html" %}
+<fieldset><legend>What will I do next?</legend>
+{% for k, v in next_steps.items() %}{% if k != 'revisit' or ps.topic %}<label class="choice"><input type="radio" name="choice" value="{{ k }}" {{ 'checked' if ps.next_step == k }}> {{ v }}</label>{% endif %}{% endfor %}
+</fieldset>
+<label>A note to myself <span class="small">(optional and private: your parent and the admin can't see it)</span><textarea name="reflection" maxlength="500" rows="2">{{ ps.reflection or '' }}</textarea></label>
+<button class="button">Save and continue</button></form>
+{% endblock %}

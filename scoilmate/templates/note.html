@@ -1,0 +1,9 @@
+{% extends "base.html" %}{% block title %}{{ lesson.data.title }}{% endblock %}
+{% block content %}
+<p class="crumbs"><a href="/practice">Practice</a> › {{ title }} › Topic note</p>
+{% with draft=lesson.status != 'published' %}{% include "_draft.html" %}{% endwith %}
+{% if request.query_params.get('thanks') %}<p class="thanks" role="status">Thanks for your feedback!</p>{% endif %}
+<article class="lesson" lang="{{ lang }}"><h1>{{ lesson.data.title }}</h1><p>{{ lesson.data.body }}</p></article>
+{% with version=lesson, back='/practice/set/' ~ ps.id ~ '/q/' ~ n ~ '/note' %}{% include "_rate.html" %}{% endwith %}
+<p><a class="button" href="/practice/set/{{ ps.id }}/q/{{ n }}">Back to question {{ n }}</a></p>
+{% endblock %}

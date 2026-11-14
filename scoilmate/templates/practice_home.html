@@ -1,12 +1,15 @@
 {% extends "base.html" %}{% block title %}Practice{% endblock %}
 {% block content %}
-<h1>Choose a subject</h1>
-<section class="grid">
-{% for a in areas %}<article>
-<h2 lang="{{ a.strand.lang }}">{{ a.strand.title }}</h2>
-<p>{{ a.lessons }} topic notes · {{ a.summary.total }} questions</p>
-{% if a.summary.answered %}<p class="progress">{{ a.summary.answered }} of {{ a.summary.total }} tried this session</p>{% endif %}
-<p><a class="button" href="/practice/{{ a.strand.slug }}">Open</a></p>
-</article>{% endfor %}
+<h1>Practice</h1>
+{% if late %}<p class="notice">Time to rest: sleep helps memory. Everything will still be here tomorrow.</p>{% endif %}
+<p class="stats-line">This week: <b>{{ r.week_count }}</b> session{{ '' if r.week_count == 1 else 's' }}. <span class="small">Next step idea: {{ r.suggestion }}</span></p>
+{% if r.mistakes %}<form method="post" action="/practice/mistakes/start" class="inline">{% include "_csrf.html" %}<button class="button secondary">Redo my wrong answers ({{ r.mistakes }})</button></form>{% endif %}
+{% for row in r.strands %}
+<section class="card"><h2 lang="{{ row.strand.lang }}">{{ row.strand.title }}</h2>
+{% if row.topics %}<ul class="topics">{% for t in row.topics %}<li><a href="/practice/topic/{{ t.topic.slug }}" lang="{{ row.strand.lang }}">{{ t.topic.title }}</a> {% with level=t.level, label=t.label %}{% include "_level.html" %}{% endwith %} {% if t.due_text %}<span class="small {{ 'amber' if t.ready }}">{{ t.due_text }}</span>{% endif %}</li>{% endfor %}</ul>
+{% if row.mixed_ready %}<p><a class="button secondary" href="/practice/mixed/{{ row.strand.slug }}">Mixed review</a> <span class="small">Questions from several topics, shuffled. The only way to reach Mastered.</span></p>{% endif %}
+{% else %}<p class="small">No practice ready for this subject yet.</p>{% endif %}
 </section>
+{% else %}<p>No subjects chosen yet. <a href="/me/settings">Choose your subjects</a>.</p>{% endfor %}
+<p class="small">Levels describe your practice on ScoilMate only. They are not exam grades. <a href="/progress">See my progress</a></p>
 {% endblock %}

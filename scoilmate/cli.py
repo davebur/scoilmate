@@ -7,6 +7,7 @@
     python -m scoilmate.cli restore FILE            # replace the database with a backup (server stopped!)
     python -m scoilmate.cli create-admin LOGIN [--name NAME]
         # prompts for the password; or reads SCOILMATE_ADMIN_PASSWORD (tests/automation)
+    python -m scoilmate.cli seed-demo [--reset]     # clearly fake demo accounts + practice history
 """
 from __future__ import annotations
 
@@ -83,6 +84,21 @@ def cmd_create_admin(args):
         sys.exit(str(exc))
 
 
+def cmd_seed_demo(args):
+    from . import demo
+    if settings.secure_cookies and not args.force:
+        sys.exit('Refusing to add demo accounts with known passwords to an HTTPS deployment (use --force).')
+    db.migrate()
+    try:
+        with db.session_scope() as s:
+            logins = demo.seed(s, reset=args.reset)
+    except ValueError as exc:
+        sys.exit(str(exc))
+    print('Demo accounts (fake people; for local testing only):')
+    for login, password in logins.items():
+        print(f'  {login:15} {password}')
+
+
 def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(prog='python -m scoilmate.cli', description='ScoilMate management')
     sub = p.add_subparsers(dest='cmd', required=True)
@@ -98,6 +114,8 @@ def build_parser() -> argparse.ArgumentParser:
     a = sub.add_parser('create-admin'); a.add_argument('login'); a.add_argument('--name')
     a.add_argument('--reset', action='store_true', help='set a new password for an existing admin')
     a.set_defaults(fn=cmd_create_admin)
+    d = sub.add_parser('seed-demo'); d.add_argument('--reset', action='store_true'); d.add_argument('--force', action='store_true')
+    d.set_defaults(fn=cmd_seed_demo)
     return p
 
 

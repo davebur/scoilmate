@@ -1,0 +1,3 @@
+<fieldset><legend>Before you start: how confident are you? <span class="small">(optional, only you see this)</span></legend>
+{% for v, name in ((1, 'Not yet'), (2, 'A bit'), (3, 'Mostly'), (4, 'Very')) %}<label class="choice"><input type="radio" name="confidence" value="{{ v }}"> {{ name }}</label>{% endfor %}
+</fieldset>

@@ -1,0 +1,14 @@
+{% extends "base.html" %}{% block title %}{{ topic.title }}{% endblock %}
+{% block content %}
+<p class="crumbs"><a href="/practice">Practice</a> › <span lang="{{ strand.lang }}">{{ strand.title }}</span></p>
+<h1 lang="{{ strand.lang }}">{{ topic.title }}</h1>
+{% include "_draft.html" %}
+{% if request.query_params.get('thanks') %}<p class="thanks" role="status">Thanks for your feedback!</p>{% endif %}
+<p>{% include "_level.html" %} <span class="small">{{ reason }}</span>{% if due %} · <span class="small">{{ due }}</span>{% endif %}</p>
+{% for lesson in lessons %}<article class="lesson" lang="{{ strand.lang }}"><h2>{{ lesson.data.title }}</h2><p>{{ lesson.data.body }}</p></article>
+{% with version=lesson, back='/practice/topic/' ~ topic.slug %}{% include "_rate.html" %}{% endwith %}{% endfor %}
+<form method="post" action="/practice/topic/{{ topic.slug }}/start" class="card">{% include "_csrf.html" %}
+<h2>Practise this topic ({{ n_questions }} question{{ '' if n_questions == 1 else 's' }})</h2>
+{% include "_confidence.html" %}
+<button class="button">Start</button></form>
+{% endblock %}

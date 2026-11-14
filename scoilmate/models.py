@@ -237,3 +237,40 @@ class AuditLog(Base):
     detail: Mapped[str | None] = mapped_column(String(300))
     actor: Mapped[User | None] = relationship(foreign_keys=[actor_id])
     target: Mapped[User | None] = relationship(foreign_keys=[target_user_id])
+
+
+# ---------- learning (migration 0003) ----------
+
+class TopicProgress(Base):
+    """Derived cache, rebuilt by replaying completed practice sets (learning.replay)."""
+    __tablename__ = 'topic_progress'
+    __table_args__ = (CheckConstraint("level IN ('not_started','attempted','familiar','proficient','mastered')",
+                                      name='level'),)
+    student_id: Mapped[str] = mapped_column(ForeignKey('user.id', ondelete='CASCADE'), primary_key=True)
+    topic_id: Mapped[int] = mapped_column(ForeignKey('topic.id', ondelete='RESTRICT'), primary_key=True)
+    level: Mapped[str] = mapped_column(String(12))
+    reason: Mapped[str] = mapped_column(String(300))
+    last_practised_at: Mapped[datetime | None] = mapped_column(DateTime)
+    proficient_since: Mapped[datetime | None] = mapped_column(DateTime)
+    due_at: Mapped[datetime | None] = mapped_column(DateTime)
+    mastered_reviews: Mapped[int] = mapped_column(Integer, default=0)
+    rule_version: Mapped[int] = mapped_column(Integer)
+
+
+class Activity(Base):
+    """Common activity log so reports cover every activity type (lessons read, sets done, ...)."""
+    __tablename__ = 'activity'
+    __table_args__ = (CheckConstraint("kind IN ('lesson_read','set_completed')", name='kind'),)
+    id: Mapped[int] = mapped_column(primary_key=True)
+    student_id: Mapped[str] = mapped_column(ForeignKey('user.id', ondelete='CASCADE'), index=True)
+    kind: Mapped[str] = mapped_column(String(20))
+    version_id: Mapped[int | None] = mapped_column(ForeignKey('content_version.id', ondelete='RESTRICT'))
+    set_id: Mapped[int | None] = mapped_column(ForeignKey('practice_set.id', ondelete='CASCADE'))
+    at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
+
+
+class RatingReceipt(Base):
+    """Records *that* a student rated a version (one rating each), never what they said."""
+    __tablename__ = 'rating_receipt'
+    student_id: Mapped[str] = mapped_column(ForeignKey('user.id', ondelete='CASCADE'), primary_key=True)
+    version_id: Mapped[int] = mapped_column(ForeignKey('content_version.id', ondelete='RESTRICT'), primary_key=True)

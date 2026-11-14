@@ -1,9 +1,0 @@
-{% extends "base.html" %}{% block title %}{{ lesson.title }}{% endblock %}
-{% block content %}
-<p class="crumbs"><a href="/practice">Practice</a> › <a href="/practice/{{ strand.slug }}" lang="{{ strand.lang }}">{{ strand.title }}</a> › Topic note</p>
-{% if thanks %}<p class="thanks" role="status">Thanks for your feedback!</p>{% endif %}
-<article class="lesson" lang="{{ strand.lang }}"><h1>{{ lesson.title }}</h1><p>{{ lesson.body }}</p></article>
-<p class="draft">Draft note — not yet reviewed by a teacher.</p>
-{% with item_type='lesson', item_id=lesson.id, n=back %}{% include "_rate.html" %}{% endwith %}
-<p>{% if back %}<a class="button" href="/practice/{{ strand.slug }}/q/{{ back }}">Back to question {{ back }}</a>{% else %}<a class="button" href="/practice/{{ strand.slug }}/q/1">Practise this subject</a>{% endif %}</p>
-{% endblock %}

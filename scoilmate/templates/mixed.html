@@ -1,0 +1,10 @@
+{% extends "base.html" %}{% block title %}Mixed review{% endblock %}
+{% block content %}
+<p class="crumbs"><a href="/practice">Practice</a> › Mixed review</p>
+<h1>Mixed review: <span lang="{{ strand.lang }}">{{ strand.title }}</span></h1>
+{% if topics %}
+<p>Questions from {{ topics|length }} topics you have practised, shuffled together. Mixing topics helps you tell similar ideas apart. If a topic is Proficient and you get its questions right with no hints, at least 3 days after it became Proficient, it moves to Mastered.</p>
+<ul>{% for t in topics %}<li lang="{{ strand.lang }}">{{ t.title }}</li>{% endfor %}</ul>
+<form method="post" action="/practice/mixed/{{ strand.slug }}/start" class="card">{% include "_csrf.html" %}{% include "_confidence.html" %}<button class="button">Start mixed review</button></form>
+{% else %}<p>Practise at least {{ min_topics }} topics in this subject first, then come back for a mixed review.</p>{% endif %}
+{% endblock %}

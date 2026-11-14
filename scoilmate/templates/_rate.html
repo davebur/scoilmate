@@ -1,11 +1,12 @@
-{# expects: strand, item_type, item_id, n, rated #}
-{% if rated %}<p class="rated">Thanks — you rated this {{ 'question' if item_type == 'question' else 'note' }}.</p>
+{# expects: version (ContentVersion), back (path), rated (set of version ids) #}
+{% set what = 'question' if version.item.kind == 'question' else 'note' %}
+{% if version.id in rated %}<p class="rated">Thanks, you rated this {{ what }}.</p>
 {% else %}
-<form class="rate" method="post" action="/practice/{{ strand.slug }}/rate">{% include "_csrf.html" %}
-<fieldset><legend>Was this {{ 'question' if item_type == 'question' else 'note' }} useful?</legend>
-<input type="hidden" name="item_type" value="{{ item_type }}"><input type="hidden" name="item_id" value="{{ item_id }}"><input type="hidden" name="n" value="{{ n }}">
-<label class="sr" for="reason-{{ item_id }}">Optional reason</label>
-<select id="reason-{{ item_id }}" name="reason"><option value="">Reason (optional)</option>{% for k, v in reasons.items() %}<option value="{{ k }}">{{ v }}</option>{% endfor %}</select>
+<form class="rate" method="post" action="/practice/rate">{% include "_csrf.html" %}
+<fieldset><legend>Was this {{ what }} useful? <span class="small">(anonymous)</span></legend>
+<input type="hidden" name="version_id" value="{{ version.id }}"><input type="hidden" name="back" value="{{ back }}">
+<label class="sr" for="reason-{{ version.id }}">Optional reason</label>
+<select id="reason-{{ version.id }}" name="reason"><option value="">Reason (optional)</option>{% for k, v in reasons.items() %}<option value="{{ k }}">{{ v }}</option>{% endfor %}</select>
 <button name="rating" value="up" class="thumb" aria-label="Thumbs up: useful">👍</button>
 <button name="rating" value="down" class="thumb" aria-label="Thumbs down: not useful">👎</button>
 </fieldset></form>

@@ -36,3 +36,12 @@ nav.top .spacer{flex:1}.who{font-size:.9rem}form.inline{display:inline}
 .button.danger{background:#7a3b00}.amber{color:#8a4a00;font-weight:600}
 .logindetails dt{font-weight:600}.logindetails dd{margin:0 0 .6rem;font-size:1.2rem}
 .banner-draft{background:#fff5cd;border:2px dashed #806100;padding:.5rem 1rem;border-radius:.6rem;font-weight:600}
+.lvl{display:inline-block;border-radius:1rem;padding:.05rem .6rem;font-size:.85rem;font-weight:600;border:1px solid}
+.lvl-not_started{color:#4a4f6a;border-color:#c6d3dd;background:#fff}.lvl-attempted{color:#7a4a00;border-color:#d9a54a;background:#fff8e8}
+.lvl-familiar{color:#5a5a00;border-color:#c4c45a;background:#fbfbe6}.lvl-proficient{color:#1d6a3a;border-color:#7cc497;background:#eefaf1}
+.lvl-mastered{color:#fff;border-color:#1d6a3a;background:#1d6a3a}
+.topics li{margin:.35rem 0}.choice{display:inline-block;margin:.2rem .8rem .2rem 0}
+.filters{display:flex;flex-wrap:wrap;gap:1rem;align-items:center}.filters label{display:inline;margin:0}
+.scroll{overflow-x:auto}.grid-table th,.grid-table td{white-space:nowrap}
+.stats-line{font-size:1.05rem}
+@media print{nav.top,footer,.filters,form{display:none}body{background:#fff}}
