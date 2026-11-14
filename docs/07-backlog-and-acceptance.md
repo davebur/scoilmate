@@ -1,6 +1,6 @@
 # ScoilMate: roadmap and acceptance checks
 
-Revised 2026-11-14 with Dave: deliver a clickable learning loop first, then add storage, accounts, reports and the review workflow. Research inputs: [competitor features](research/competitor-features.md), [exam paper analysis](research/exam-paper-analysis.md), [learning design guidance](research/learning-design-guidance.md) (step details below are refined once these land).
+Revised 2026-11-14 with Dave: deliver a clickable learning loop first, then add storage, accounts, reports and the review workflow. Research inputs: [competitor features](research/competitor-features.md), [exam paper analysis](research/exam-paper-analysis.md), [learning design guidance](research/learning-design-guidance.md) (all three completed 2026-11-14 and folded in below).
 
 ## Status
 
@@ -15,6 +15,31 @@ Revised 2026-11-14 with Dave: deliver a clickable learning loop first, then add 
 | 6 | Reports: **student "My progress"** and **admin per-student and class progress reports** | Planned |
 | 7 | Admin content authoring/review/publish; ratings review queue; more content | Planned |
 | 8 | Privacy/safeguarding sign-off and pilot release gate | Planned |
+
+## Feature set from research
+
+What students and admins get, and why. Sources: common features across 18 tools, the 35 SEC papers from 2022–2026, and the learning-science guidance.
+
+| Feature | Evidence | Step |
+|---|---|---|
+| Topic notes + topic-tagged practice with instant, explained feedback | 15/18 tools; retrieval practice (high utility) | 1 ✅, extended in 4 |
+| Hint ladder: nudge → strategy/worked parallel → eliminate one option; explanation says why right *and* why the chosen option is wrong | 7/18 tools; worked examples | 1 (2 hints) → 3 hints in content batch |
+| **Topics + mastery levels** Not started / Attempted / Familiar / Proficient / Mastered, with the rule shown in plain words; hints reduce credit but are never shamed | Khan Academy mastery model | 4–6 |
+| **Mixed reviews** (10–15 Qs from 3–5 topics within one subject), the only route to Mastered, ≥3 days later | interleaving + spacing; Khan | 6 |
+| **Revisit ladder** 1 / 3 / 7 / 21 / 45 days by level; "Due for review: Thursday"; compresses if an exam date is set | spacing (high utility); 7/18 tools | 6 |
+| **Mistake review** ("redo my wrong answers") | 6/18 tools | 6 |
+| **More activity types** beyond MCQ, chosen from the paper analysis: cloze and three-option grammar (Gaeilge), timeline/ordering and cause-vs-consequence sorting (History), source cards with retrieval questions (History), flashcards for key terms/vocab/poetic terms, short typed recall | exam coverage map | 4 then content batches |
+| **Structured writing plans + self-assessment checklists** for writing tasks MCQs can't cover: functional forms (English), *ceapadóireacht* to bullet points (Gaeilge), "account of a person/event" (History). Checklists mirror marking criteria (English: focus, ideas, development, coherence, expression, register; Gaeilge: bullets developed, tense and mutation accuracy); compare with a model answer | marking schemes; MCQ gap | 7 |
+| **Metacognition**: confidence (1–4) before a set, compared with the result after; "What will I do next?" at the end | EEF metacognition (+8 months) | 6 |
+| **Study plan**: exam date + weekly time → due reviews + one new topic per session; process goals; reschedule without penalty | EEF/self-regulation; rare in competitors | Later |
+| **Student "My progress"** and **admin per-student + class reports** (see step 6) | 12/18 and 9/18 tools | 6 |
+| **Admin assignments** ("practise topic X by date Y", completion tracking) | 9/18 tools | Later (after 6) |
+| **Timed practice / mini-mock** per paper section | 4/18 tools; exam timing gap | Later |
+| **Gaeilge listening** with original recorded audio (not SEC MP3s) | aural is 45–60 marks every year | Later (P2) |
+| 👍/👎 content ratings → admin review queue | Dave's request | 1 ✅, queue in 7 |
+| Exam-stress/wellbeing page linking official Irish supports | Bitesize; Dept of Education | 7 |
+
+**Deliberately excluded**, because they conflict with a privacy-first, invite-only app for 13–15-year-olds: leaderboards/leagues, streaks and loss-aversion mechanics (replaced by a private "this week: 3 sessions" tally that resets quietly), push/email nags (opt-in, daytime, max 1/day if ever added), AI tutor/marking, messaging or tutor chat, ads, parent accounts (use admin exports instead), third-party video embeds, grade or descriptor predictions, learning-styles matching, and reproducing SEC papers (write original exam-style items and link to examinations.ie for real papers).
 
 ## Acceptance checks
 
@@ -34,9 +59,10 @@ Revised 2026-11-14 with Dave: deliver a clickable learning loop first, then add 
 - Roles: admin, student. Admin can **add a student** (display name/pseudonym, year, subject tracks/levels — minimal data), **deactivate/remove a student**, reset access. Removal: deactivate first; hard delete erases attempts and ratings links per retention policy; action audited.
 - No public registration. Student cannot reach admin pages or any other student's data (IDOR tests). CSRF on every POST. Cookie flags, rotation, expiry, generic login errors, rate-limited login.
 
-**Step 6 — progress reports**
-- **Student "My progress":** per subject/topic: questions tried, correct on own vs with hints, topics to revisit, recent activity; own data only; supportive wording, no grade prediction or ranking against others.
-- **Admin student report:** same per-student view plus activity over time, hint use, topics needing review, content ratings given; **class overview** table (student × topic) with filters by subject/track/year; CSV export.
+**Step 6 — progress, revisit and reports**
+- Mastery levels, revisit ladder, mixed reviews, mistake review and confidence prompts as specified in [learning design guidance §3](research/learning-design-guidance.md); every level shows the rule that produced it.
+- **Student "My progress":** per subject/topic: level and why, what's due and when, recent sessions, correct on own vs with hints (neutral wording), confidence vs result, suggested next step. Own data only; no class averages, rankings or grade predictions.
+- **Admin student report:** the same per-student view plus activity over time, overdue reviews, topics most often missed, last active date. **Class overview** (student × topic level) filtered by subject/track/year; question stats (% correct, most-chosen wrong option, hint use); CSV/printable export. Admins never see private reflection text or time-of-day detail beyond aggregates.
 - Reports cover every activity type added later (quizzes, lessons read, revisit sessions, future writing/self-assessment tasks) through a common activity log, so new approaches appear without redesign.
 - Deterministic: report rebuilt from attempts equals cached figures.
 
@@ -47,7 +73,13 @@ Revised 2026-11-14 with Dave: deliver a clickable learning loop first, then add 
 **Step 8 — pilot gate**
 - 30-concurrent burst; no lost responses; 429 rate limits; XSS/IDOR/CSRF checks; restore drill; export/erase; accessibility and manual Gaeilge checks; DPIA screening and notices approved.
 
+## First content batch (from the exam analysis, pending teacher review)
+- **English:** poetic techniques + unseen-poem response; functional writing forms (diary, speech, email/letter, review, blog); unseen non-fiction comprehension; studied-text key-moment bank; Shakespeare (HL) generic skills.
+- **History:** working with sources; chronology and key terms; archaeology and archives; Great Famine/emigration and the Holocaust; Age of Exploration/Renaissance with an "account of" plan.
+- **Gaeilge:** question words + paragraph *léamhthuiscint*; grammar in context (tenses, copula, séimhiú/urú); *ceapadóireacht* to bullet points; themed vocabulary; *sraith pictiúr* (T2 OL). Literature only after the cohort's text list is verified.
+All items original; SEC papers inform format and skills only.
+
 ## Later
-More reviewed content (3+ topics/subject, 5–10 questions/topic); spaced revisit reminders (opt-in, explainable); P2: audio/listening, short answers, school groups, H5P; GitHub and production hosting only with Dave's explicit sign-off.
+More reviewed content (3+ topics/subject, 5–10 questions/topic); P2: audio/listening, short answers, school groups, H5P; GitHub and production hosting only with Dave's explicit sign-off.
 
 Test pyramid: content fixture checks and HTTP tests now (`tools/test_*.py`); DB integration, permission matrix and browser/accessibility tests as steps land. Never test with real minors' data.
