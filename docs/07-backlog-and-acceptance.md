@@ -10,7 +10,7 @@ Revised 2026-11-14 with Dave: deliver a clickable learning loop first, then add 
 | 1 | Practice slice (no DB): topic notes → questions → hints → server-graded feedback → session summary; thumbs up/down ratings | **Done — ready to test** |
 | 2 | Show to a teacher/student, adjust | Next (Dave) |
 | 3 | Decisions D1/D2: cohort, Gaeilge track/levels, reviewers, pilot topics | Open (Dave) |
-| 4 | Storage: SQLite + SQLAlchemy + Alembic for content, attempts, ratings | Planned |
+| 4 | Storage: SQLite + SQLAlchemy + Alembic for content, attempts, ratings | **Done** (`tools/test_storage.py`) |
 | 5 | Accounts: admin, **parent** and student roles, sessions, CSRF; admins add/remove students and parents; parents add and manage their own children | Planned |
 | 6 | Reports: **student "My progress"**, **parent view of each linked child**, **admin per-student and class reports** | Planned |
 | 7 | Admin content authoring/review/publish; ratings review queue; more content | Planned |

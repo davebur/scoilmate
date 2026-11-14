@@ -1,26 +1,27 @@
-"""Summarise anonymous thumbs up/down ratings until the admin report page exists.
+"""Summarise anonymous thumbs up/down ratings from the database (admins also have /admin/ratings).
 
-Usage: python3 tools/feedback_report.py [path-to-feedback.jsonl]
+Usage: .venv/bin/python tools/feedback_report.py
 """
-import json
 import sys
-from collections import Counter, defaultdict
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[1]
-path = Path(sys.argv[1]) if len(sys.argv) > 1 else ROOT / 'instance' / 'content-feedback.jsonl'
-if not path.exists():
-    sys.exit(f'No ratings yet ({path} not found).')
-items = defaultdict(lambda: {'up': 0, 'down': 0, 'reasons': Counter()})
-for line in path.read_text(encoding='utf-8').splitlines():
-    if not line.strip():
-        continue
-    row = json.loads(line)
-    key = (row['type'], row['id'], row['version'])
-    items[key][row['rating']] += 1
-    if row.get('reason'):
-        items[key]['reasons'][row['reason']] += 1
-print(f"{'type':8} {'id':22} {'v':>2} {'👍':>3} {'👎':>3}  reasons")
-for (kind, item_id, version), s in sorted(items.items(), key=lambda kv: -kv[1]['down']):
-    reasons = ', '.join(f'{k}×{v}' for k, v in s['reasons'].most_common())
-    print(f"{kind:8} {item_id:22} {version:>2} {s['up']:>3} {s['down']:>3}  {reasons}")
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from sqlalchemy import case, func, select  # noqa: E402
+
+from scoilmate import db  # noqa: E402
+from scoilmate.models import ContentItem, ContentRating, ContentVersion  # noqa: E402
+
+with db.session_scope() as s:
+    rows = s.execute(
+        select(ContentItem.kind, ContentItem.slug, ContentVersion.version,
+               func.sum(case((ContentRating.rating == 'up', 1), else_=0)),
+               func.sum(case((ContentRating.rating == 'down', 1), else_=0)),
+               func.group_concat(ContentRating.reason))
+        .join(ContentVersion, ContentRating.version_id == ContentVersion.id).join(ContentItem)
+        .group_by(ContentVersion.id).order_by(func.sum(case((ContentRating.rating == 'down', 1), else_=0)).desc())
+    ).all()
+if not rows:
+    sys.exit('No ratings yet.')
+print(f"{'type':8} {'id':22} {'v':>2} {'up':>3} {'down':>4}  reasons")
+for kind, slug, version, up, down, reasons in rows:
+    print(f"{kind:8} {slug:22} {version:>2} {up:>3} {down:>4}  {reasons or ''}")

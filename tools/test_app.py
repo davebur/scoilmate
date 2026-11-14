@@ -8,27 +8,42 @@ import tempfile
 import unittest
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(ROOT))
-_tmp = tempfile.TemporaryDirectory()
-os.environ['SCOILMATE_FEEDBACK_FILE'] = str(Path(_tmp.name) / 'feedback.jsonl')
-
 try:
+    import testutil
     from fastapi.testclient import TestClient
-    from scoilmate import app as appmod
-    from scoilmate.content import load
+    from sqlalchemy import select
+    from scoilmate import app as appmod, db
+    from scoilmate.models import ContentItem, ContentRating, ContentVersion
 except ImportError as exc:  # system python without the venv
     raise unittest.SkipTest(f'preview dependencies unavailable: {exc}')
 
 
+def ratings():
+    with db.session_scope() as s:
+        rows = s.execute(select(ContentItem.kind, ContentItem.slug, ContentRating.rating, ContentRating.reason)
+                         .join(ContentVersion, ContentRating.version_id == ContentVersion.id)
+                         .join(ContentItem).order_by(ContentRating.id)).all()
+    return [tuple(r) for r in rows]
+
+
+class _C:
+    """Minimal view of the draft JSON used to drive the tests."""
+    def __init__(self):
+        data = json.loads((testutil.ROOT / 'content/draft-samples.json').read_text())
+        self.qs = data['questions']
+
+    def strand_questions(self, subject, track='general'):
+        return [q for q in self.qs if (q['subject'], q['track']) == (subject, track)]
+
+
 class PracticeTests(unittest.TestCase):
     def setUp(self):
+        testutil.fresh_db()
         self.client = TestClient(appmod.app)
-        self.c = load()
-        appmod.FEEDBACK_FILE.unlink(missing_ok=True)
+        self.c = _C()
 
     def first(self, slug='english'):
-        return self.c.strand_questions(self.c.strands[slug])[0]
+        return self.c.strand_questions(slug)[0]
 
     def test_pages_render(self):
         for path in ['/', '/practice', '/health', '/practice/english', '/practice/gaeilge-t2',
@@ -46,8 +61,9 @@ class PracticeTests(unittest.TestCase):
                 self.assertEqual(self.client.get(path).status_code, 404)
 
     def test_question_page_never_leaks_key_or_explanation(self):
-        for slug, strand in self.c.strands.items():
-            for n, q in enumerate(self.c.strand_questions(strand), 1):
+        for slug, (subject, track) in {'english': ('english', 'general'), 'history': ('history', 'general'),
+                                       'gaeilge-t1': ('gaeilge', 'T1'), 'gaeilge-t2': ('gaeilge', 'T2')}.items():
+            for n, q in enumerate(self.c.strand_questions(subject, track), 1):
                 html = self.client.get(f'/practice/{slug}/q/{n}?hints=9').text
                 self.assertNotIn(q['explanation'], html)
                 self.assertNotIn('correct', html.lower().replace('check answer', ''))
@@ -101,10 +117,9 @@ class PracticeTests(unittest.TestCase):
             'item_type': 'question', 'item_id': q['id'], 'rating': 'up', 'n': '1'})
         self.client.post('/practice/english/rate', data={
             'item_type': 'lesson', 'item_id': 'lesson-simile', 'rating': 'up', 'n': '0'})
-        rows = [json.loads(x) for x in appmod.FEEDBACK_FILE.read_text().splitlines()]
-        self.assertEqual([(x['type'], x['id'], x['rating'], x['reason']) for x in rows],
-                         [('question', q['id'], 'down', 'unclear'), ('lesson', 'lesson-simile', 'up', None)])
-        self.assertEqual(set(rows[0]), {'at', 'type', 'id', 'version', 'rating', 'reason'})  # nothing identifying
+        self.assertEqual(ratings(), [('question', q['id'], 'down', 'unclear'), ('lesson', 'lesson-simile', 'up', None)])
+        cols = {c.name for c in ContentRating.__table__.columns}
+        self.assertFalse(cols & {'user_id', 'student_id', 'ip', 'note'})  # nothing identifying
         self.assertIn('you rated this note', self.client.get('/practice/english/lesson/lesson-simile').text)
 
     def test_rating_rejects_bad_input(self):
@@ -116,7 +131,7 @@ class PracticeTests(unittest.TestCase):
         for data in bad:
             with self.subTest(data=data):
                 self.assertIn(self.client.post('/practice/english/rate', data=data).status_code, (400, 404))
-        self.assertFalse(appmod.FEEDBACK_FILE.exists())
+        self.assertEqual(ratings(), [])
 
 
 if __name__ == '__main__':

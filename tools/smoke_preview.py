@@ -4,7 +4,8 @@ import json, os, socket, subprocess, tempfile, time, urllib.request
 ROOT=Path(__file__).resolve().parents[1]
 with socket.socket() as sock:
     sock.bind(('127.0.0.1',0)); port=sock.getsockname()[1]
-env=dict(os.environ,HOST='127.0.0.1',PORT=str(port),RELOAD='0')
+tmpdir=tempfile.TemporaryDirectory(prefix='scoilmate-smoke-')  # never touch instance/ data
+env=dict(os.environ,HOST='127.0.0.1',PORT=str(port),RELOAD='0',SCOILMATE_DB=str(Path(tmpdir.name)/'smoke.db'))
 with tempfile.TemporaryFile(mode='w+') as log:
     proc=subprocess.Popen([str(ROOT/'run_local_testing')],cwd='/tmp',env=env,stdout=log,stderr=subprocess.STDOUT)
     try:

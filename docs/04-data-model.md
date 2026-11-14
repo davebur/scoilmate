@@ -1,4 +1,14 @@
 # ScoilMate: proposed logical schema
+
+## Implemented (step 4 onward)
+The executable schema is `scoilmate/models.py` plus Alembic migrations in `scoilmate/migrations/versions/` (a test checks they agree). Deliberate simplifications of the plan below, for a small pilot:
+- **Content:** `topic` → `content_item(kind lesson|question, slug, topic_id)` → `content_version(item_id, version, status, title, body JSON, author/review/publish/retire columns)`. Options, key, explanation and hints live in the version's JSON body instead of separate `option`/`answer_key`/`hint` tables. A SQLite trigger rejects any change to a version's identity, title or body: edits create a new version. Status changes (review, publish, retire) are allowed.
+- **Topics:** the draft JSON has no topic field, so the importer makes one topic per help lesson (each question joins its help lesson's topic). An explicit `topic: {slug, title}` on a lesson overrides this.
+- **Attempts:** `practice_set` (topic / mixed / mistakes; confidence before, next step, private reflection) → `practice_item` (pins `question_version_id` and the help `lesson_version_id`) → `hint_event` (server-recorded) and `response` (first answer only, UNIQUE per item). Pinned versions cannot be deleted (FK RESTRICT).
+- **Ratings:** `content_rating(version_id, rating, reason, at)`: anonymous, no user column. The step-1 JSONL file is imported once (line digest dedupe).
+- IDs: users use random UUID hex; content/attempt rows use integer keys that are always looked up scoped to the current user.
+
+## Original plan
 Planning schema, not executable migration. UUID text IDs at boundaries; UTC timestamps; explicit CHECK/UNIQUE/FK constraints and application validation. Never persist passwords/tokens in content fixtures.
 
 ## Identity and curriculum

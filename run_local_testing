@@ -10,6 +10,10 @@ else
 fi
 if [[ -z "$PYTHON" ]]; then echo 'Python 3 is required.' >&2; exit 1; fi
 export HOST="${HOST:-0.0.0.0}" PORT="${PORT:-8000}" RELOAD="${RELOAD:-0}"
+# Preview only: students may practise draft (not teacher-reviewed) content. Set 0 to disable.
+export SCOILMATE_ALLOW_DRAFT_PRACTICE="${SCOILMATE_ALLOW_DRAFT_PRACTICE:-1}"
+# Plain-HTTP preview: Secure cookies off unless you serve it over HTTPS.
+export SCOILMATE_SECURE_COOKIES="${SCOILMATE_SECURE_COOKIES:-0}"
 "$PYTHON" - <<'PY'
 import ipaddress, os, socket, sys
 host, port, reload = (os.environ[k] for k in ('HOST','PORT','RELOAD'))
@@ -22,7 +26,7 @@ try:
 except ValueError as exc:
     sys.exit(f'Invalid local testing settings: {exc}; HOST must be an IPv4/IPv6 address.')
 try:
-    import fastapi, uvicorn
+    import fastapi, uvicorn, sqlalchemy, alembic, argon2
 except ImportError:
     sys.exit('Preview dependencies missing. Run: python3 -m venv .venv && .venv/bin/python -m pip install -r requirements.txt')
 port=int(port)
@@ -46,6 +50,10 @@ for ip in sorted(addresses):
     print(f'Discovered host/LAN candidate: http://{shown}:{port}/',flush=True)
 print('Address discovery is best effort: isolation/container routing and firewall may prevent LAN access. No firewall changes made. Do not expose publicly. Ctrl-C stops the preview.',flush=True)
 PY
+# Database: apply migrations, then import draft content and any step-1 ratings (both idempotent).
+"$PYTHON" -m scoilmate.cli migrate
+"$PYTHON" -m scoilmate.cli import-content
+"$PYTHON" -m scoilmate.cli import-ratings
 args=(scoilmate.app:app --host "$HOST" --port "$PORT" --no-proxy-headers)
 if [[ "$RELOAD" == 1 ]]; then args+=(--reload); fi
 exec "$PYTHON" -m uvicorn "${args[@]}"

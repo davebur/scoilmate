@@ -1,7 +1,7 @@
 """ScoilMate preview: learn -> practise -> feedback, using draft sample content.
 
-No accounts, no database, no student data. Quiz progress lives only in a
-signed, short-lived browser cookie and is lost when the server restarts.
+Content and anonymous ratings live in SQLite (versioned rows). No accounts yet: quiz
+progress lives only in a signed, short-lived browser cookie.
 """
 from __future__ import annotations
 
@@ -11,31 +11,23 @@ import hmac
 import json
 import os
 import secrets
-import threading
-from datetime import datetime, timezone
 from pathlib import Path
 
-from fastapi import FastAPI, Form, HTTPException, Request
+from fastapi import Depends, FastAPI, Form, HTTPException, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
+from sqlalchemy.orm import Session
+
 from . import content as content_mod
+from .content import FEEDBACK_REASONS, Strand
+from .db import get_db
 
 PKG = Path(__file__).resolve().parent
 ROOT = PKG.parent
 COOKIE = 'scoilmate_practice'
 COOKIE_MAX_AGE = 4 * 3600
-# Anonymous content ratings (no identity, no free text). instance/ is git-ignored.
-FEEDBACK_FILE = Path(os.environ.get('SCOILMATE_FEEDBACK_FILE', ROOT / 'instance' / 'content-feedback.jsonl'))
-FEEDBACK_REASONS = {
-    'unclear': 'Confusing or unclear',
-    'wrong': 'I think something is wrong',
-    'too_easy': 'Too easy',
-    'too_hard': 'Too hard',
-    'helpful': 'Really helpful',
-}
-_feedback_lock = threading.Lock()
 # Per-process secret unless one is supplied: restarting the server simply resets practice runs.
 _SECRET = os.environ.get('SCOILMATE_SECRET', '').encode() or secrets.token_bytes(32)
 
@@ -103,24 +95,32 @@ def _save(response, state: dict):
     return response
 
 
-# ---- helpers ----
+# ---- helpers: a strand's current practice content, from the database ----
 
-def _content():
-    return content_mod.load()
+class _StrandContent:
+    def __init__(self, db: Session, strand: Strand):
+        topics = content_mod.strand_topics(db, strand)
+        self.question_versions = [v for t in topics for v in content_mod.topic_versions(db, t, 'question')]
+        self.lesson_versions = [v for t in topics for v in content_mod.topic_versions(db, t, 'lesson')]
+        self.questions = [dict(v.data, id=v.item.slug, version=v.version) for v in self.question_versions]
+        self.lessons = {v.item.slug: dict(v.data, id=v.item.slug, version=v.version) for v in self.lesson_versions}
 
 
-def _strand(slug: str):
-    strand = _content().strands.get(slug)
-    if strand is None:
+def _strands(db: Session) -> list[Strand]:
+    return [s for s in content_mod.all_strands() if content_mod.strand_topics(db, s)]
+
+
+def _strand(db: Session, slug: str):
+    strand = Strand.from_slug(slug)
+    if strand is None or strand not in _strands(db):
         raise HTTPException(404, 'Unknown practice area')
-    return strand
+    return strand, _StrandContent(db, strand)
 
 
-def _question_at(strand, n: int):
-    qs = _content().strand_questions(strand)
-    if not 1 <= n <= len(qs):
+def _question_at(sc: _StrandContent, n: int):
+    if not 1 <= n <= len(sc.questions):
         raise HTTPException(404, 'No such question')
-    return qs[n - 1], len(qs)
+    return sc.questions[n - 1], sc.question_versions[n - 1], len(sc.questions)
 
 
 def _results(state: dict, strand) -> dict:
@@ -141,15 +141,6 @@ def render(request: Request, name: str, **ctx):
     return templates.TemplateResponse(request, name, ctx)
 
 
-def record_feedback(item_type: str, item: dict, rating: str, reason: str | None):
-    entry = {'at': datetime.now(timezone.utc).isoformat(timespec='seconds'), 'type': item_type,
-             'id': item['id'], 'version': item['version'], 'rating': rating, 'reason': reason}
-    with _feedback_lock:
-        FEEDBACK_FILE.parent.mkdir(parents=True, exist_ok=True)
-        with FEEDBACK_FILE.open('a', encoding='utf-8') as fh:
-            fh.write(json.dumps(entry) + '\n')
-
-
 # ---- routes ----
 
 @app.get('/health')
@@ -158,58 +149,62 @@ def health():
 
 
 @app.get('/', response_class=HTMLResponse)
-def landing(request: Request):
-    return render(request, 'landing.html', strands=list(_content().strands.values()))
+def landing(request: Request, db: Session = Depends(get_db)):
+    return render(request, 'landing.html', strands=_strands(db))
 
 
 @app.get('/practice', response_class=HTMLResponse)
-def practice_home(request: Request):
-    c, state = _content(), _state(request)
-    areas = [{'strand': s, 'summary': _summary(_results(state, s), len(c.strand_questions(s))),
-              'lessons': len(c.strand_lessons(s))} for s in c.strands.values()]
+def practice_home(request: Request, db: Session = Depends(get_db)):
+    state = _state(request)
+    areas = []
+    for s in _strands(db):
+        sc = _StrandContent(db, s)
+        areas.append({'strand': s, 'summary': _summary(_results(state, s), len(sc.questions)),
+                      'lessons': len(sc.lessons)})
     return render(request, 'practice_home.html', areas=areas)
 
 
 @app.get('/practice/{slug}', response_class=HTMLResponse)
-def strand_home(request: Request, slug: str):
-    strand, c = _strand(slug), _content()
-    qs = c.strand_questions(strand)
-    return render(request, 'strand.html', strand=strand, lessons=c.strand_lessons(strand),
-                  summary=_summary(_results(_state(request), strand), len(qs)))
+def strand_home(request: Request, slug: str, db: Session = Depends(get_db)):
+    strand, sc = _strand(db, slug)
+    return render(request, 'strand.html', strand=strand, lessons=list(sc.lessons.values()),
+                  summary=_summary(_results(_state(request), strand), len(sc.questions)))
 
 
 @app.get('/practice/{slug}/lesson/{lesson_id}', response_class=HTMLResponse)
-def lesson(request: Request, slug: str, lesson_id: str, back: int = 0, thanks: int = 0):
-    strand, c = _strand(slug), _content()
-    item = c.lessons.get(lesson_id)
-    if item is None or (item['subject'], item['track']) != (strand.subject, strand.track):
+def lesson(request: Request, slug: str, lesson_id: str, back: int = 0, thanks: int = 0,
+           db: Session = Depends(get_db)):
+    strand, sc = _strand(db, slug)
+    item = sc.lessons.get(lesson_id)
+    if item is None:
         raise HTTPException(404, 'No such lesson')
-    qs = c.strand_questions(strand)
-    back = back if 1 <= back <= len(qs) else 0
+    back = back if 1 <= back <= len(sc.questions) else 0
     rated = f"l:{lesson_id}:{item['version']}" in (_state(request).get('_rated') or [])
     return render(request, 'lesson.html', strand=strand, lesson=item, back=back,
                   thanks=bool(thanks), rated=rated)
 
 
 @app.get('/practice/{slug}/q/{n}', response_class=HTMLResponse)
-def question(request: Request, slug: str, n: int, hints: int = 0, thanks: int = 0):
-    strand = _strand(slug)
-    q, total = _question_at(strand, n)
-    public = _content().public_question(q, hints)
+def question(request: Request, slug: str, n: int, hints: int = 0, thanks: int = 0,
+             db: Session = Depends(get_db)):
+    strand, sc = _strand(db, slug)
+    q, v, total = _question_at(sc, n)
+    public = content_mod.public_question(v, hints)
     return render(request, 'question.html', strand=strand, q=public, n=n, total=total,
                   hints_shown=len(public['hints']), thanks=bool(thanks))
 
 
 @app.post('/practice/{slug}/q/{n}', response_class=HTMLResponse)
-def answer(request: Request, slug: str, n: int, option: str = Form(''), hints_used: int = Form(0)):
-    strand = _strand(slug)
-    q, total = _question_at(strand, n)
+def answer(request: Request, slug: str, n: int, option: str = Form(''), hints_used: int = Form(0),
+           db: Session = Depends(get_db)):
+    strand, sc = _strand(db, slug)
+    q, v, total = _question_at(sc, n)
     if not option:
-        public = _content().public_question(q, hints_used)
+        public = content_mod.public_question(v, hints_used)
         return render(request, 'question.html', strand=strand, q=public, n=n, total=total,
                       hints_shown=len(public['hints']), error='Choose an answer before checking.')
     try:
-        result = _content().grade(q['id'], option)
+        result = content_mod.grade(v, option)
     except ValueError:
         raise HTTPException(400, 'Invalid answer option')
     hints_used = max(0, min(hints_used, len(q['hints'])))
@@ -219,7 +214,7 @@ def answer(request: Request, slug: str, n: int, option: str = Form(''), hints_us
     if first_attempt:  # the first answer counts; retries are practice only
         run[q['id']] = {'c': result['correct'], 'h': hints_used, 'v': q['version']}
         state[strand.slug] = run
-    lesson_item = _content().lessons[q['help_lesson_id']]
+    lesson_item = sc.lessons.get(q['help_lesson_id'])
     rated = f"q:{q['id']}:{q['version']}" in (state.get('_rated') or [])
     response = render(request, 'feedback.html', strand=strand, q=q, n=n, total=total, result=result,
                       hints_used=hints_used, first_attempt=first_attempt, lesson=lesson_item,
@@ -228,53 +223,56 @@ def answer(request: Request, slug: str, n: int, option: str = Form(''), hints_us
 
 
 @app.get('/practice/{slug}/summary', response_class=HTMLResponse)
-def summary(request: Request, slug: str, thanks: int = 0):
-    strand, c = _strand(slug), _content()
-    qs = c.strand_questions(strand)
+def summary(request: Request, slug: str, thanks: int = 0, db: Session = Depends(get_db)):
+    strand, sc = _strand(db, slug)
     results = _results(_state(request), strand)
     rows = []
-    for i, q in enumerate(qs, 1):
+    for i, q in enumerate(sc.questions, 1):
         r = results.get(q['id'])
         status = 'not tried' if r is None else ('correct' if r['c'] and not r['h'] else
                                                 'correct with hints' if r['c'] else 'review')
         rows.append({'n': i, 'prompt': q['prompt'], 'status': status,
-                     'lesson': c.lessons[q['help_lesson_id']]})
+                     'lesson': sc.lessons.get(q['help_lesson_id'])})
     return render(request, 'summary.html', strand=strand, rows=rows,
-                  summary=_summary(results, len(qs)), thanks=bool(thanks))
+                  summary=_summary(results, len(sc.questions)), thanks=bool(thanks))
 
 
 @app.post('/practice/{slug}/rate')
 def rate(request: Request, slug: str, item_type: str = Form(...), item_id: str = Form(...),
-         rating: str = Form(...), reason: str = Form(''), n: int = Form(0)):
+         rating: str = Form(...), reason: str = Form(''), n: int = Form(0), db: Session = Depends(get_db)):
     """Thumbs up/down on a question or lesson. Anonymous; one rating per item per browser run."""
-    strand, c = _strand(slug), _content()
+    strand, sc = _strand(db, slug)
     if rating not in ('up', 'down') or (reason and reason not in FEEDBACK_REASONS):
         raise HTTPException(400, 'Invalid rating')
-    pool = c.questions if item_type == 'question' else c.lessons if item_type == 'lesson' else None
-    item = pool.get(item_id) if pool is not None else None
-    if item is None or (item['subject'], item['track']) != (strand.subject, strand.track):
+    if item_type == 'question':
+        version = next((v for v in sc.question_versions if v.item.slug == item_id), None)
+    elif item_type == 'lesson':
+        version = next((v for v in sc.lesson_versions if v.item.slug == item_id), None)
+    else:
+        version = None
+    if version is None:
         raise HTTPException(404, 'No such item')
     state = _state(request)
     rated = state.get('_rated') if isinstance(state.get('_rated'), list) else []
-    key = f"{item_type[0]}:{item_id}:{item['version']}"
+    key = f"{item_type[0]}:{item_id}:{version.version}"
     if key not in rated:
-        record_feedback(item_type, item, rating, reason or None)
+        content_mod.record_rating(db, version, rating, reason or None)
         rated.append(key)
         state['_rated'] = rated[-200:]
+    total = len(sc.questions)
     if item_type == 'lesson':
         target = f'/practice/{strand.slug}/lesson/{item_id}?thanks=1'
-        if 1 <= n <= len(c.strand_questions(strand)):
+        if 1 <= n <= total:
             target += f'&back={n}'
     else:
-        total = len(c.strand_questions(strand))
         target = (f'/practice/{strand.slug}/q/{n + 1}?thanks=1' if 1 <= n < total
                   else f'/practice/{strand.slug}/summary?thanks=1')
     return _save(RedirectResponse(target, status_code=303), state)
 
 
 @app.post('/practice/{slug}/reset')
-def reset(request: Request, slug: str):
-    strand = _strand(slug)
+def reset(request: Request, slug: str, db: Session = Depends(get_db)):
+    strand, _ = _strand(db, slug)
     state = _state(request)
     state.pop(strand.slug, None)
     return _save(RedirectResponse(f'/practice/{strand.slug}', status_code=303), state)
