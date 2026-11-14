@@ -4,6 +4,7 @@
 {% if thanks %}<p class="thanks" role="status">Thanks for your feedback!</p>{% endif %}
 <progress value="{{ n - 1 }}" max="{{ total }}" aria-label="Question {{ n }} of {{ total }}"></progress>
 <form method="post" action="/practice/{{ strand.slug }}/q/{{ n }}" class="question" lang="{{ strand.lang }}">
+{% include "_csrf.html" %}
 <fieldset><legend><span class="qn">Question {{ n }}</span> {{ q.prompt }}</legend>
 {% if error %}<p class="error" role="alert" lang="en">{{ error }}</p>{% endif %}
 {% for o in q.options %}<label class="option"><input type="radio" name="option" value="{{ o.id }}"> <b>{{ o.id }}</b> {{ o.text }}</label>{% endfor %}

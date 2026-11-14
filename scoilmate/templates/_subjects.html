@@ -1,0 +1,11 @@
+{# expects: subjects (dict subject -> StudentSubject or form dict), year, form (optional) #}
+<label>School year
+<select name="school_year"><option value="">Not set</option>{% for y in (1, 2, 3) %}<option value="{{ y }}" {{ 'selected' if year == y }}>{{ y }}{{ ('st','nd','rd')[y-1] }} year</option>{% endfor %}</select></label>
+<fieldset><legend>Subjects</legend>
+{% for code, info in SUBJECTS.items() %}{% set cur = subjects.get(code) %}
+<div class="subject-row"><label><input type="checkbox" name="subj_{{ code }}" {{ 'checked' if cur }}> <span lang="{{ info.lang }}">{{ info.name }}</span></label>
+{% if TRACKS[code]|length > 1 %}<label>Track <select name="track_{{ code }}">{% for t in TRACKS[code] %}<option value="{{ t }}" {{ 'selected' if cur and cur.track == t }}>{{ TRACK_NAMES[t] }}</option>{% endfor %}</select></label>{% endif %}
+{% if LEVELS[code]|length > 1 %}<label>Level <select name="level_{{ code }}">{% for lv in LEVELS[code] %}<option value="{{ lv }}" {{ 'selected' if cur and cur.level == lv }}>{{ lv|capitalize }}</option>{% endfor %}</select></label>{% else %}<span class="small">Common level</span>{% endif %}
+</div>{% endfor %}
+<p class="small">Gaeilge T1/T2 is the course track, not an ability level. Levels can stay "undecided".</p>
+</fieldset>

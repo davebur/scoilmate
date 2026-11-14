@@ -1,0 +1,13 @@
+{% extends "base.html" %}{% block title %}Log in{% endblock %}
+{% block content %}
+<h1>Log in</h1>
+{% if request.query_params.get('bye') %}<p class="thanks" role="status">You have logged out.</p>{% endif %}
+{% if error %}<p class="error" role="alert">{{ error }}</p>{% endif %}
+<form method="post" action="/login" class="card narrow">
+{% include "_csrf.html" %}<input type="hidden" name="next" value="{{ next }}">
+<label>Login name <input name="login" value="{{ login or '' }}" autocomplete="username" autocapitalize="none" required maxlength="64"></label>
+<label>Password <input name="password" type="password" autocomplete="current-password" required maxlength="128"></label>
+<button class="button">Log in</button>
+</form>
+<p class="small">Accounts are made by a parent or the site admin; there is no public sign-up. Forgotten your password? Ask the parent or admin who set up your account to reset it.</p>
+{% endblock %}

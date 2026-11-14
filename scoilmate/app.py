@@ -11,45 +11,62 @@ import hmac
 import json
 import os
 import secrets
-from pathlib import Path
 
 from fastapi import Depends, FastAPI, Form, HTTPException, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
-from fastapi.templating import Jinja2Templates
-
 from sqlalchemy.orm import Session
+from starlette.exceptions import HTTPException as StarletteHTTPException
 
-from . import content as content_mod
+from . import auth, content as content_mod
+from .auth import LoginRequired, csrf_protect
+from .config import settings
 from .content import FEEDBACK_REASONS, Strand
 from .db import get_db
+from .views_accounts import router as accounts_router
+from .web import PKG, render
 
-PKG = Path(__file__).resolve().parent
 ROOT = PKG.parent
 COOKIE = 'scoilmate_practice'
 COOKIE_MAX_AGE = 4 * 3600
 # Per-process secret unless one is supplied: restarting the server simply resets practice runs.
 _SECRET = os.environ.get('SCOILMATE_SECRET', '').encode() or secrets.token_bytes(32)
+CSP = ("default-src 'self'; script-src 'none'; img-src 'self'; style-src 'self'; form-action 'self'; "
+       "frame-ancestors 'none'; base-uri 'none'; object-src 'none'")
 
-app = FastAPI(title='ScoilMate preview', docs_url=None, redoc_url=None, openapi_url=None)
+app = FastAPI(title='ScoilMate preview', docs_url=None, redoc_url=None, openapi_url=None,
+              dependencies=[Depends(auth.current_session)])  # every page knows who is logged in
 app.mount('/static/branding', StaticFiles(directory=ROOT / 'assets' / 'branding'), name='branding')
 app.mount('/static/app', StaticFiles(directory=PKG / 'static'), name='appstatic')
-templates = Jinja2Templates(directory=PKG / 'templates')
+app.include_router(accounts_router)
 
 
 @app.middleware('http')
 async def security_headers(request: Request, call_next):
+    # Pre-login CSRF: random double-submit cookie; after login the token is bound to the session.
+    token = request.cookies.get(settings.csrf_cookie)
+    fresh = not token or len(token) > 100
+    request.state.anon_csrf = secrets.token_urlsafe(32) if fresh else token
     response = await call_next(request)
-    response.headers.setdefault('X-Content-Type-Options', 'nosniff')
-    response.headers.setdefault('Referrer-Policy', 'same-origin')
-    response.headers.setdefault('X-Frame-Options', 'DENY')
-    response.headers.setdefault(
-        'Content-Security-Policy',
-        "default-src 'self'; img-src 'self'; style-src 'self'; form-action 'self'; frame-ancestors 'none'")
+    if fresh:
+        response.set_cookie(settings.csrf_cookie, request.state.anon_csrf, httponly=True, samesite='lax',
+                            secure=settings.secure_cookies, path='/')
+    h = response.headers
+    h.setdefault('X-Content-Type-Options', 'nosniff')
+    h.setdefault('Referrer-Policy', 'same-origin')
+    h.setdefault('X-Frame-Options', 'DENY')
+    h.setdefault('Content-Security-Policy', CSP)
+    if not request.url.path.startswith('/static/'):
+        h.setdefault('Cache-Control', 'no-store')
+    if settings.secure_cookies:
+        h.setdefault('Strict-Transport-Security', 'max-age=31536000')
     return response
 
 
-from starlette.exceptions import HTTPException as StarletteHTTPException
+@app.exception_handler(LoginRequired)
+async def login_required(request: Request, exc: LoginRequired):
+    target = request.url.path if request.method == 'GET' else ''
+    return RedirectResponse('/login' + (f'?next={target}' if target else ''), status_code=303)
 
 
 @app.exception_handler(StarletteHTTPException)
@@ -57,10 +74,7 @@ async def http_error(request: Request, exc: StarletteHTTPException):
     if request.url.path.startswith('/static/'):
         return HTMLResponse('Not found', status_code=exc.status_code)
     message = exc.detail if exc.status_code < 500 else 'Something went wrong'
-    response = templates.TemplateResponse(request, 'error.html',
-                                          {'status': exc.status_code, 'message': message},
-                                          status_code=exc.status_code)
-    return response
+    return render(request, 'error.html', status_code=exc.status_code, status=exc.status_code, message=message)
 
 
 # ---- signed practice-state cookie (no server storage) ----
@@ -136,11 +150,6 @@ def _summary(results: dict, total: int) -> dict:
             'independent': independent, 'assisted': correct - independent}
 
 
-def render(request: Request, name: str, **ctx):
-    ctx.setdefault('reasons', FEEDBACK_REASONS)
-    return templates.TemplateResponse(request, name, ctx)
-
-
 # ---- routes ----
 
 @app.get('/health')
@@ -194,7 +203,7 @@ def question(request: Request, slug: str, n: int, hints: int = 0, thanks: int = 
                   hints_shown=len(public['hints']), thanks=bool(thanks))
 
 
-@app.post('/practice/{slug}/q/{n}', response_class=HTMLResponse)
+@app.post('/practice/{slug}/q/{n}', response_class=HTMLResponse, dependencies=[Depends(csrf_protect)])
 def answer(request: Request, slug: str, n: int, option: str = Form(''), hints_used: int = Form(0),
            db: Session = Depends(get_db)):
     strand, sc = _strand(db, slug)
@@ -237,7 +246,7 @@ def summary(request: Request, slug: str, thanks: int = 0, db: Session = Depends(
                   summary=_summary(results, len(sc.questions)), thanks=bool(thanks))
 
 
-@app.post('/practice/{slug}/rate')
+@app.post('/practice/{slug}/rate', dependencies=[Depends(csrf_protect)])
 def rate(request: Request, slug: str, item_type: str = Form(...), item_id: str = Form(...),
          rating: str = Form(...), reason: str = Form(''), n: int = Form(0), db: Session = Depends(get_db)):
     """Thumbs up/down on a question or lesson. Anonymous; one rating per item per browser run."""
@@ -270,7 +279,7 @@ def rate(request: Request, slug: str, item_type: str = Form(...), item_id: str =
     return _save(RedirectResponse(target, status_code=303), state)
 
 
-@app.post('/practice/{slug}/reset')
+@app.post('/practice/{slug}/reset', dependencies=[Depends(csrf_protect)])
 def reset(request: Request, slug: str, db: Session = Depends(get_db)):
     strand, _ = _strand(db, slug)
     state = _state(request)

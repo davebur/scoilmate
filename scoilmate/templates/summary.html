@@ -13,5 +13,5 @@
 {% for r in rows %}<tr class="st-{{ r.status|replace(' ', '-') }}"><td>{{ r.n }}</td><td lang="{{ strand.lang }}"><a href="/practice/{{ strand.slug }}/q/{{ r.n }}">{{ r.prompt }}</a></td><td>{{ r.status }}</td><td><a href="/practice/{{ strand.slug }}/lesson/{{ r.lesson.id }}" lang="{{ strand.lang }}">{{ r.lesson.title }}</a></td></tr>{% endfor %}
 </tbody></table>
 <p class="small">This is practice, not a grade. Your results are kept only in this browser for a few hours and are not saved anywhere else.</p>
-<form method="post" action="/practice/{{ strand.slug }}/reset"><button class="button secondary">Start fresh</button> <a class="button" href="/practice">Choose another subject</a></form>
+<form method="post" action="/practice/{{ strand.slug }}/reset">{% include "_csrf.html" %}<button class="button secondary">Start fresh</button> <a class="button" href="/practice">Choose another subject</a></form>
 {% endblock %}

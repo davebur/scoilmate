@@ -1,0 +1,14 @@
+{% extends "base.html" %}{% block title %}Accounts{% endblock %}
+{% block content %}
+<h1>Accounts</h1>
+<p><a class="button" href="/admin/users/new?role=student">Add a student</a> <a class="button" href="/admin/users/new?role=parent">Add a parent</a> <a class="button secondary" href="/admin/audit">Audit log</a></p>
+{% if deletion_requests %}<section class="notice"><h2>Deletion requests</h2><ul>{% for s in deletion_requests %}<li><a href="/admin/users/{{ s.id }}">{{ s.display_name }}</a> — requested {{ s.deletion_requested_at|date }}</li>{% endfor %}</ul></section>{% endif %}
+{% if orphans %}<section class="notice"><h2>Students without a parent</h2><ul>{% for s in orphans %}<li><a href="/admin/users/{{ s.id }}">{{ s.display_name }}</a></li>{% endfor %}</ul></section>{% endif %}
+<table><caption>Students ({{ students|length }})</caption><thead><tr><th scope="col">Name</th><th scope="col">Login</th><th scope="col">Year</th><th scope="col">Parents</th><th scope="col">Status</th></tr></thead><tbody>
+{% for s in students %}<tr><td><a href="/admin/users/{{ s.id }}">{{ s.display_name }}</a></td><td>{{ s.login }}</td><td>{{ s.school_year or '—' }}</td><td>{% for p in parents_of[s.id] %}{{ p.display_name }}{{ ', ' if not loop.last }}{% else %}<span class="amber">none</span>{% endfor %}</td><td>{{ s.status }}</td></tr>{% endfor %}
+</tbody></table>
+<table><caption>Parents ({{ parents|length }})</caption><thead><tr><th scope="col">Name</th><th scope="col">Login</th><th scope="col">Status</th></tr></thead><tbody>
+{% for p in parents %}<tr><td><a href="/admin/users/{{ p.id }}">{{ p.display_name }}</a></td><td>{{ p.login }}</td><td>{{ p.status }}</td></tr>{% endfor %}
+</tbody></table>
+<p class="small">Admins ({{ admins|length }}) are created with <code>python -m scoilmate.cli create-admin</code>.</p>
+{% endblock %}

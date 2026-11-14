@@ -1,0 +1,11 @@
+{% extends "base.html" %}{% block title %}My children{% endblock %}
+{% block content %}
+<h1>My children</h1>
+<section class="grid">
+{% for c in children %}<article><h2>{{ c.display_name }}</h2><p>Login: <code>{{ c.login }}</code>{% if not c.active %} · <span class="amber">deactivated</span>{% endif %}</p>
+<p><a class="button" href="/parent/children/{{ c.id }}/report">Progress</a> <a class="button secondary" href="/parent/children/{{ c.id }}">Settings</a></p></article>
+{% else %}<p>No children added yet.</p>{% endfor %}
+</section>
+<p><a class="button" href="/parent/children/new">Add a child</a></p>
+<p class="small">You can see and manage only the children linked to your account. To link a child someone else created, ask the site admin.</p>
+{% endblock %}

@@ -1,0 +1,20 @@
+{% extends "base.html" %}{% block title %}{{ child.display_name }}{% endblock %}
+{% block content %}
+<p class="crumbs"><a href="/parent">My children</a> › {{ child.display_name }}</p>
+<h1>{{ child.display_name }}</h1>
+{% if request.query_params.get('saved') %}<p class="thanks" role="status">Saved.</p>{% endif %}
+<p>Login: <code>{{ child.login }}</code> · {{ 'active' if child.active else 'deactivated' }} · <a href="/parent/children/{{ child.id }}/report">Progress</a> · <a href="/parent/children/{{ child.id }}/export.json">Download their data (JSON)</a></p>
+<form method="post" action="/parent/children/{{ child.id }}/settings" class="card">{% include "_csrf.html" %}
+<h2>Settings</h2><label>Name or nickname <input name="display_name" value="{{ child.display_name }}" maxlength="80" required></label>
+{% with subjects=subjects, year=child.school_year %}{% include "_subjects.html" %}{% endwith %}
+<button class="button">Save settings</button></form>
+<section class="card"><h2>Access</h2>
+<form method="post" action="/parent/children/{{ child.id }}/reset" class="inline">{% include "_csrf.html" %}<button class="button secondary">Reset password</button></form>
+<form method="post" action="/parent/children/{{ child.id }}/status" class="inline">{% include "_csrf.html" %}{% if child.active %}<button class="button secondary" name="active" value="0">Deactivate</button>{% else %}<button class="button secondary" name="active" value="1">Reactivate</button>{% endif %}</form>
+<h3>Delete account and data</h3>
+{% if child.deletion_requested_at %}<p class="notice">You asked for deletion on {{ child.deletion_requested_at|date }}. The site admin will confirm it.</p>
+<form method="post" action="/parent/children/{{ child.id }}/deletion">{% include "_csrf.html" %}<button class="button secondary" name="cancel" value="1">Cancel the request</button></form>
+{% else %}<p class="small">The admin confirms deletions. Everything about {{ child.display_name }} is then removed for good.</p>
+<form method="post" action="/parent/children/{{ child.id }}/deletion">{% include "_csrf.html" %}<button class="button secondary">Request deletion</button></form>{% endif %}
+</section>
+{% endblock %}

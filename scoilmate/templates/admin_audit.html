@@ -1,0 +1,8 @@
+{% extends "base.html" %}{% block title %}Audit log{% endblock %}
+{% block content %}
+<p class="crumbs"><a href="/admin">Accounts</a> › Audit log</p>
+<h1>Audit log</h1>
+<table><thead><tr><th scope="col">When</th><th scope="col">Who</th><th scope="col">Action</th><th scope="col">Account</th><th scope="col">Detail</th></tr></thead><tbody>
+{% for e in log %}<tr><td>{{ e.at|date(True) }}</td><td>{{ e.actor.display_name if e.actor else 'system / removed' }}</td><td>{{ e.action }}</td><td>{% if e.target %}<a href="/admin/users/{{ e.target.id }}">{{ e.target.display_name }}</a>{% else %}—{% endif %}</td><td>{{ e.detail or '' }}</td></tr>{% endfor %}
+</tbody></table>
+{% endblock %}

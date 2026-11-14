@@ -1,0 +1,9 @@
+{% extends "base.html" %}{% block title %}My subjects{% endblock %}
+{% block content %}
+<h1>My subjects</h1>
+{% if saved %}<p class="thanks" role="status">Saved.</p>{% endif %}
+<form method="post" action="/me/settings" class="card">{% include "_csrf.html" %}
+{% include "_subjects.html" %}
+<button class="button">Save</button></form>
+<p class="small">To change your name or password, ask the parent or admin who set up your account.</p>
+{% endblock %}

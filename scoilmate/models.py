@@ -201,3 +201,39 @@ class Response(Base):
     hints_used: Mapped[int] = mapped_column(Integer)
     credit: Mapped[float] = mapped_column(Float)
     answered_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
+
+
+# ---------- accounts (migration 0002) ----------
+
+class AuthSession(Base):
+    """Server-side session. Only a SHA-256 digest of the cookie token is stored."""
+    __tablename__ = 'session'
+    token_digest: Mapped[str] = mapped_column(String(64), primary_key=True)
+    user_id: Mapped[str] = mapped_column(ForeignKey('user.id', ondelete='CASCADE'), index=True)
+    csrf_token: Mapped[str] = mapped_column(String(64))
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
+    last_seen_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
+    idle_expires_at: Mapped[datetime] = mapped_column(DateTime)
+    absolute_expires_at: Mapped[datetime] = mapped_column(DateTime)
+    user: Mapped[User] = relationship()
+
+
+class ParentStudent(Base):
+    __tablename__ = 'parent_student'
+    parent_id: Mapped[str] = mapped_column(ForeignKey('user.id', ondelete='CASCADE'), primary_key=True)
+    student_id: Mapped[str] = mapped_column(ForeignKey('user.id', ondelete='CASCADE'), primary_key=True, index=True)
+    created_by: Mapped[str | None] = mapped_column(ForeignKey('user.id', ondelete='SET NULL'))
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
+
+
+class AuditLog(Base):
+    """Who did what to which account. Never holds passwords, tokens or reflection text."""
+    __tablename__ = 'audit_log'
+    id: Mapped[int] = mapped_column(primary_key=True)
+    at: Mapped[datetime] = mapped_column(DateTime, default=utcnow, index=True)
+    actor_id: Mapped[str | None] = mapped_column(ForeignKey('user.id', ondelete='SET NULL'))
+    action: Mapped[str] = mapped_column(String(40))
+    target_user_id: Mapped[str | None] = mapped_column(ForeignKey('user.id', ondelete='SET NULL'), index=True)
+    detail: Mapped[str | None] = mapped_column(String(300))
+    actor: Mapped[User | None] = relationship(foreign_keys=[actor_id])
+    target: Mapped[User | None] = relationship(foreign_keys=[target_user_id])

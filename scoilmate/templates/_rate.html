@@ -1,7 +1,7 @@
 {# expects: strand, item_type, item_id, n, rated #}
 {% if rated %}<p class="rated">Thanks — you rated this {{ 'question' if item_type == 'question' else 'note' }}.</p>
 {% else %}
-<form class="rate" method="post" action="/practice/{{ strand.slug }}/rate">
+<form class="rate" method="post" action="/practice/{{ strand.slug }}/rate">{% include "_csrf.html" %}
 <fieldset><legend>Was this {{ 'question' if item_type == 'question' else 'note' }} useful?</legend>
 <input type="hidden" name="item_type" value="{{ item_type }}"><input type="hidden" name="item_id" value="{{ item_id }}"><input type="hidden" name="n" value="{{ n }}">
 <label class="sr" for="reason-{{ item_id }}">Optional reason</label>

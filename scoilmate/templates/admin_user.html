@@ -1,0 +1,29 @@
+{% extends "base.html" %}{% block title %}{{ target.display_name }}{% endblock %}
+{% block content %}
+<p class="crumbs"><a href="/admin">Accounts</a> › {{ target.display_name }}</p>
+<h1>{{ target.display_name }} <span class="small">({{ target.role }}, {{ target.status }})</span></h1>
+{% if request.query_params.get('saved') %}<p class="thanks" role="status">Saved.</p>{% endif %}
+<p>Login: <code>{{ target.login }}</code>{% if target.email %} · {{ target.email }}{% endif %} · created {{ target.created_at|date }}</p>
+{% if target.role == 'student' %}<p><a class="button secondary" href="/admin/reports/students/{{ target.id }}">Progress report</a> <a class="button secondary" href="/admin/users/{{ target.id }}/export.json">Export data (JSON)</a></p>
+{% if target.deletion_requested_at %}<p class="notice">A parent asked for this student's account and data to be deleted on {{ target.deletion_requested_at|date }}. Confirm below.</p>{% endif %}
+<form method="post" action="/admin/users/{{ target.id }}/settings" class="card">{% include "_csrf.html" %}
+<h2>Settings</h2><label>Name or nickname <input name="display_name" value="{{ target.display_name }}" maxlength="80" required></label>
+{% with year=target.school_year %}{% include "_subjects.html" %}{% endwith %}
+<button class="button">Save settings</button></form>{% endif %}
+{% if target.role in ('student', 'parent') %}
+<section class="card"><h2>{{ 'Parents' if target.role == 'student' else 'Children' }}</h2>
+<ul>{% for o in linked %}<li><a href="/admin/users/{{ o.id }}">{{ o.display_name }}</a> ({{ o.login }})
+<form method="post" action="/admin/users/{{ target.id }}/link" class="inline">{% include "_csrf.html" %}<input type="hidden" name="other_id" value="{{ o.id }}"><button class="linkbutton" name="unlink" value="1">Unlink</button></form></li>{% else %}<li>None linked.</li>{% endfor %}</ul>
+{% if candidates %}<form method="post" action="/admin/users/{{ target.id }}/link">{% include "_csrf.html" %}<label>Link {{ 'a parent' if target.role == 'student' else 'a student' }} <select name="other_id">{% for c in candidates %}<option value="{{ c.id }}">{{ c.display_name }} ({{ c.login }})</option>{% endfor %}</select></label> <button class="button secondary">Link</button></form>{% endif %}
+</section>{% endif %}
+<section class="card"><h2>Access</h2>
+{% if target.id != user.id %}
+<form method="post" action="/admin/users/{{ target.id }}/reset" class="inline">{% include "_csrf.html" %}<button class="button secondary">Reset password</button></form>
+<form method="post" action="/admin/users/{{ target.id }}/status" class="inline">{% include "_csrf.html" %}{% if target.active %}<button class="button secondary" name="active" value="0">Deactivate</button>{% else %}<button class="button secondary" name="active" value="1">Reactivate</button>{% endif %}</form>
+<h3>Delete permanently</h3>
+<p class="small">{% if target.role == 'student' %}Deletes the account and all practice history, sessions and links. This cannot be undone.{% else %}Deletes the account. Their children stay; any child left without a parent is flagged.{% endif %}</p>
+<form method="post" action="/admin/users/{{ target.id }}/delete">{% include "_csrf.html" %}<label>Type the login name <code>{{ target.login }}</code> to confirm <input name="confirm" autocomplete="off" required></label> <button class="button danger">Delete</button></form>
+{% else %}<p class="small">This is your own account.</p>{% endif %}
+</section>
+<table><caption>Recent changes</caption><tbody>{% for e in log %}<tr><td>{{ e.at|date(True) }}</td><td>{{ e.action }}</td><td>{{ e.actor.display_name if e.actor else 'system' }}</td><td>{{ e.detail or '' }}</td></tr>{% endfor %}</tbody></table>
+{% endblock %}

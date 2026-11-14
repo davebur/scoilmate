@@ -39,7 +39,7 @@ class _C:
 class PracticeTests(unittest.TestCase):
     def setUp(self):
         testutil.fresh_db()
-        self.client = TestClient(appmod.app)
+        self.client = testutil.Client()
         self.c = _C()
 
     def first(self, slug='english'):
@@ -75,13 +75,13 @@ class PracticeTests(unittest.TestCase):
     def test_grading_and_summary(self):
         q = self.first()
         wrong = next(o['id'] for o in q['options'] if o['id'] != q['correct_option_id'])
-        r = self.client.post('/practice/english/q/1', data={'option': q['correct_option_id'], 'hints_used': '0'})
+        r = self.client.submit('/practice/english/q/1', data={'option': q['correct_option_id'], 'hints_used': '0'})
         self.assertIn('Correct', r.text)
         self.assertIn(q['explanation'], r.text)
-        r = self.client.post('/practice/english/q/2', data={'option': 'A', 'hints_used': '2'})
+        r = self.client.submit('/practice/english/q/2', data={'option': 'A', 'hints_used': '2'})
         self.assertEqual(r.status_code, 200)
         # Retry of q1 with the wrong answer must not overwrite the first result
-        r = self.client.post('/practice/english/q/1', data={'option': wrong, 'hints_used': '0'})
+        r = self.client.submit('/practice/english/q/1', data={'option': wrong, 'hints_used': '0'})
         self.assertIn('Not this time', r.text)
         self.assertIn('first answer is the one that counts', r.text)
         s = self.client.get('/practice/english/summary').text
@@ -89,8 +89,8 @@ class PracticeTests(unittest.TestCase):
         self.assertIn('<b>1</b> correct on your own', s)
 
     def test_invalid_and_missing_answers(self):
-        self.assertEqual(self.client.post('/practice/english/q/1', data={'option': 'Z'}).status_code, 400)
-        r = self.client.post('/practice/english/q/1', data={})
+        self.assertEqual(self.client.submit('/practice/english/q/1', data={'option': 'Z'}).status_code, 400)
+        r = self.client.submit('/practice/english/q/1', data={})
         self.assertEqual(r.status_code, 200)
         self.assertIn('Choose an answer', r.text)
 
@@ -100,22 +100,22 @@ class PracticeTests(unittest.TestCase):
 
     def test_reset(self):
         q = self.first()
-        self.client.post('/practice/english/q/1', data={'option': q['correct_option_id']})
-        r = self.client.post('/practice/english/reset', follow_redirects=True)
+        self.client.submit('/practice/english/q/1', data={'option': q['correct_option_id']})
+        r = self.client.submit('/practice/english/reset', follow_redirects=True)
         self.assertEqual(r.status_code, 200)
         self.assertIn('Start questions', r.text)
 
     def test_rating_question_and_lesson(self):
         q = self.first()
-        r = self.client.post('/practice/english/rate', data={
+        r = self.client.submit('/practice/english/rate', data={
             'item_type': 'question', 'item_id': q['id'], 'rating': 'down', 'reason': 'unclear', 'n': '1'},
             follow_redirects=False)
         self.assertEqual(r.status_code, 303)
         self.assertTrue(r.headers['location'].startswith('/practice/english/q/2'))
         # duplicate rating from the same browser is not recorded twice
-        self.client.post('/practice/english/rate', data={
+        self.client.submit('/practice/english/rate', data={
             'item_type': 'question', 'item_id': q['id'], 'rating': 'up', 'n': '1'})
-        self.client.post('/practice/english/rate', data={
+        self.client.submit('/practice/english/rate', data={
             'item_type': 'lesson', 'item_id': 'lesson-simile', 'rating': 'up', 'n': '0'})
         self.assertEqual(ratings(), [('question', q['id'], 'down', 'unclear'), ('lesson', 'lesson-simile', 'up', None)])
         cols = {c.name for c in ContentRating.__table__.columns}
@@ -130,7 +130,7 @@ class PracticeTests(unittest.TestCase):
                {'item_type': 'question', 'item_id': 'q-primary', 'rating': 'up'}]  # wrong subject
         for data in bad:
             with self.subTest(data=data):
-                self.assertIn(self.client.post('/practice/english/rate', data=data).status_code, (400, 404))
+                self.assertIn(self.client.submit('/practice/english/rate', data=data).status_code, (400, 404))
         self.assertEqual(ratings(), [])
 
 

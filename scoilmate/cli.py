@@ -5,6 +5,8 @@
     python -m scoilmate.cli import-ratings [file]   # move step-1 JSONL ratings into the database
     python -m scoilmate.cli backup [--out FILE]     # online backup (SQLite backup API)
     python -m scoilmate.cli restore FILE            # replace the database with a backup (server stopped!)
+    python -m scoilmate.cli create-admin LOGIN [--name NAME]
+        # prompts for the password; or reads SCOILMATE_ADMIN_PASSWORD (tests/automation)
 """
 from __future__ import annotations
 
@@ -54,6 +56,33 @@ def cmd_restore(args):
     print(f'Restored {args.file} into {settings.db_path}.')
 
 
+def cmd_create_admin(args):
+    import getpass
+    import os
+    from . import accounts, auth
+    from .models import User
+    password = os.environ.get('SCOILMATE_ADMIN_PASSWORD')
+    if not password:
+        password = getpass.getpass('New admin password (8-128 characters): ')
+        if getpass.getpass('Repeat password: ') != password:
+            sys.exit('Passwords did not match.')
+    try:
+        auth.check_password(password)
+        db.migrate()
+        with db.session_scope() as s:
+            existing = s.query(User).filter_by(login=auth.normalise_login(args.login)).one_or_none()
+            if existing is not None:
+                if existing.role != 'admin' or not args.reset:
+                    sys.exit('That login exists. Use --reset to set a new password for an existing admin.')
+                accounts.reset_access(s, None, existing, password)
+                print(f'Password reset for admin {existing.login}.')
+                return
+            user = accounts.create_user(s, None, 'admin', args.login, args.name or args.login, password)
+            print(f'Admin {user.login} created.')
+    except ValueError as exc:
+        sys.exit(str(exc))
+
+
 def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(prog='python -m scoilmate.cli', description='ScoilMate management')
     sub = p.add_subparsers(dest='cmd', required=True)
@@ -66,6 +95,9 @@ def build_parser() -> argparse.ArgumentParser:
     b = sub.add_parser('backup'); b.add_argument('--out'); b.set_defaults(fn=cmd_backup)
     rs = sub.add_parser('restore'); rs.add_argument('file'); rs.add_argument('--yes', action='store_true')
     rs.set_defaults(fn=cmd_restore)
+    a = sub.add_parser('create-admin'); a.add_argument('login'); a.add_argument('--name')
+    a.add_argument('--reset', action='store_true', help='set a new password for an existing admin')
+    a.set_defaults(fn=cmd_create_admin)
     return p
 
 

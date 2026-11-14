@@ -28,3 +28,11 @@ select{font:inherit;padding:.3rem}.sr{position:absolute;left:-999px}
 table{width:100%;border-collapse:collapse;background:#fff;margin:1rem 0}th,td{text-align:left;padding:.5rem;border-bottom:1px solid #dde5ea;vertical-align:top}caption{text-align:left;font-weight:600;padding:.4rem 0}
 .st-review td:nth-child(3){color:#b05a00;font-weight:600}.st-correct td:nth-child(3){color:#1d7a3a;font-weight:600}
 footer{max-width:52rem;margin:2rem auto;padding:0 1rem 2rem;font-size:.85rem;color:#4a4f6a}
+nav.top .spacer{flex:1}.who{font-size:.9rem}form.inline{display:inline}
+.linkbutton{background:none;border:0;color:#292583;font:inherit;font-weight:600;text-decoration:underline;cursor:pointer;padding:0}
+.card{background:#fff;border:1px solid #c6d3dd;border-radius:1rem;padding:1rem 1.2rem;margin:1rem 0}.card.narrow{max-width:24rem}
+.card label{display:block;margin:.5rem 0}.card input:not([type=checkbox]):not([type=radio]),.card select,.card textarea{font:inherit;padding:.35rem;max-width:100%}
+.card textarea{width:100%}.subject-row{display:flex;flex-wrap:wrap;gap:1rem;align-items:center;margin:.3rem 0}.subject-row label{display:inline;margin:0}
+.button.danger{background:#7a3b00}.amber{color:#8a4a00;font-weight:600}
+.logindetails dt{font-weight:600}.logindetails dd{margin:0 0 .6rem;font-size:1.2rem}
+.banner-draft{background:#fff5cd;border:2px dashed #806100;padding:.5rem 1rem;border-radius:.6rem;font-weight:600}

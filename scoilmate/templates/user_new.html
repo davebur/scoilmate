@@ -1,0 +1,17 @@
+{% extends "base.html" %}{% block title %}Add {{ role }}{% endblock %}
+{% block content %}
+<h1>Add a {{ 'student' if role == 'student' else 'parent' }}</h1>
+{% if error %}<p class="error" role="alert">{{ error }}</p>{% endif %}
+<form method="post" action="{{ action }}" class="card">
+{% include "_csrf.html" %}<input type="hidden" name="role" value="{{ role }}">
+{% if role == 'student' %}<p class="small">Only a first name or nickname is needed. No email, date of birth or school name.</p>{% endif %}
+<label>{{ 'Name or nickname' if role == 'student' else 'Name' }} <input name="display_name" value="{{ form.display_name or '' }}" required maxlength="80"></label>
+<label>Login name <input name="login" value="{{ form.login or '' }}" required maxlength="32" autocapitalize="none" pattern="[A-Za-z0-9][A-Za-z0-9._\-]{2,31}"></label>
+{% if role == 'parent' %}<label>Email (for account recovery) <input name="email" type="email" value="{{ form.email or '' }}" maxlength="254"></label>{% endif %}
+<label>Password <input name="password" type="text" autocomplete="off" minlength="8" maxlength="128" placeholder="Leave blank to generate one"></label>
+{% if role == 'student' %}{% with subjects={'english': {'track':'general','level':'undecided'}, 'gaeilge': {'track':'T2','level':'undecided'}, 'history': {'track':'general','level':'common'}}, year=None %}{% include "_subjects.html" %}{% endwith %}
+{% if parents %}<fieldset><legend>Link to parents (optional)</legend>{% for p in parents %}<label><input type="checkbox" name="parent_id" value="{{ p.id }}"> {{ p.display_name }} ({{ p.login }})</label>{% endfor %}</fieldset>{% endif %}
+{% endif %}
+<button class="button">Create account</button>
+</form>
+{% endblock %}

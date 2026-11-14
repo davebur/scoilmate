@@ -1,0 +1,8 @@
+{% extends "base.html" %}{% block title %}Deleted{% endblock %}
+{% block content %}
+<h1>Account deleted</h1>
+<p>The {{ role }} account{% if role == 'student' %} and all of its practice history{% endif %} has been permanently removed. The audit log records that it happened, without the person's details.</p>
+{% if orphans %}<p class="notice">These students now have no linked parent. Link them to another parent or follow up:</p>
+<ul>{% for s in orphans %}<li><a href="/admin/users/{{ s.id }}">{{ s.display_name }}</a></li>{% endfor %}</ul>{% endif %}
+<p><a class="button" href="/admin">Back to accounts</a></p>
+{% endblock %}

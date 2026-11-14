@@ -5,11 +5,21 @@
 <link rel="icon" type="image/png" sizes="32x32" href="/static/branding/scoilmate-icon-32.png">
 <link rel="apple-touch-icon" href="/static/branding/scoilmate-icon-180.png">
 <link rel="stylesheet" href="/static/app/style.css">
+<meta name="csrf-token" content="{{ csrf_token }}">
 </head><body>
 <a class="skip" href="#main">Skip to content</a>
-<nav class="top" aria-label="Main"><a class="brand" href="/"><img src="/static/branding/scoilmate-icon-32.png" alt="" width="32" height="32"> ScoilMate</a><a href="/practice">Practice</a></nav>
+<nav class="top" aria-label="Main"><a class="brand" href="/"><img src="/static/branding/scoilmate-icon-32.png" alt="" width="32" height="32"> ScoilMate</a>
+{% if user and user.role == 'student' %}<a href="/practice">Practice</a><a href="/progress">My progress</a><a href="/me/settings">My subjects</a>
+{% elif user and user.role == 'parent' %}<a href="/parent">My children</a>
+{% elif user and user.role == 'admin' %}<a href="/admin">Accounts</a><a href="/admin/reports">Reports</a><a href="/admin/content">Content</a><a href="/admin/ratings">Ratings</a>
+{% endif %}<a href="/wellbeing">Wellbeing</a>
+<span class="spacer"></span>
+{% if user %}<span class="who">{{ user.display_name }} <span class="small">({{ user.role }})</span></span>
+<form method="post" action="/logout" class="inline">{% include "_csrf.html" %}<button class="linkbutton">Log out</button></form>
+{% else %}<a href="/login">Log in</a>{% endif %}
+</nav>
 <main id="main">
 {% block content %}{% endblock %}
 </main>
-<footer><strong>Preview:</strong> draft, unreviewed sample content · no login · no student data stored. Ratings are anonymous.</footer>
+<footer><strong>Preview:</strong> draft, unreviewed sample content{% if draft_practice %}; draft practice is switched on for local testing{% endif %}. Use made-up names only: no real student data. Ratings are anonymous.</footer>
 </body></html>
