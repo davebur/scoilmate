@@ -1,0 +1,521 @@
+{
+  "format_version": 1,
+  "app": "ScoilMate",
+  "status": "draft",
+  "review_status": "unreviewed",
+  "warning": "Original illustrative material only; subject/language/curriculum review required before student use.",
+  "lessons": [
+    {
+      "id": "lesson-simile",
+      "version": 1,
+      "status": "draft",
+      "review_status": "unreviewed",
+      "subject": "english",
+      "track": "general",
+      "title": "Comparisons in writing",
+      "body": "A simile compares things using like or as. Consider the effect of the comparison in its context, not just its label."
+    },
+    {
+      "id": "lesson-purpose",
+      "version": 1,
+      "status": "draft",
+      "review_status": "unreviewed",
+      "subject": "english",
+      "track": "general",
+      "title": "Audience and purpose",
+      "body": "Persuasive writing aims to influence a reader. Reasons relevant to the audience make a request more convincing."
+    },
+    {
+      "id": "lesson-inference",
+      "version": 1,
+      "status": "draft",
+      "review_status": "unreviewed",
+      "subject": "english",
+      "track": "general",
+      "title": "Evidence and inference",
+      "body": "An inference is a supported conclusion, not a certainty. Check which detail supports your reading and avoid adding facts."
+    },
+    {
+      "id": "lesson-ga-message",
+      "version": 1,
+      "status": "draft",
+      "review_status": "unreviewed",
+      "subject": "gaeilge",
+      "track": "T2",
+      "title": "Sonraí i dteachtaireacht",
+      "body": "Léigh an teachtaireacht iomlán. Tabhair faoi deara focail a bhaineann le ham agus áit."
+    },
+    {
+      "id": "lesson-ga-time",
+      "version": 1,
+      "status": "draft",
+      "review_status": "unreviewed",
+      "subject": "gaeilge",
+      "track": "T2",
+      "title": "Am i gcomhthéacs",
+      "body": "Is féidir le focail ama cabhrú leat ord imeachtaí a thuiscint. Léigh an abairt agus lorg an leid ama."
+    },
+    {
+      "id": "lesson-ga-register",
+      "version": 1,
+      "status": "draft",
+      "review_status": "unreviewed",
+      "subject": "gaeilge",
+      "track": "T1",
+      "title": "Lucht léitheoireachta agus réim",
+      "body": "Braitheann an réim teanga ar an gcomhthéacs agus ar an lucht léitheoireachta. In iarratas foirmiúil, bí soiléir agus cúirtéiseach."
+    },
+    {
+      "id": "lesson-primary",
+      "version": 1,
+      "status": "draft",
+      "review_status": "unreviewed",
+      "subject": "history",
+      "track": "general",
+      "title": "Sources and historical questions",
+      "body": "A primary source comes from the period or activity being studied. It can still be mistaken, selective or biased. Its usefulness depends on the question."
+    },
+    {
+      "id": "lesson-corroboration",
+      "version": 1,
+      "status": "draft",
+      "review_status": "unreviewed",
+      "subject": "history",
+      "track": "general",
+      "title": "Comparing evidence",
+      "body": "Corroboration compares sources to test an account. Independent agreement can strengthen a claim but does not remove the need to evaluate context."
+    },
+    {
+      "id": "lesson-continuity",
+      "version": 1,
+      "status": "draft",
+      "review_status": "unreviewed",
+      "subject": "history",
+      "track": "general",
+      "title": "Change and continuity",
+      "body": "Change means something became different; continuity means something persisted across a period. Both can appear together."
+    }
+  ],
+  "questions": [
+    {
+      "id": "q-simile",
+      "version": 1,
+      "status": "draft",
+      "review_status": "unreviewed",
+      "subject": "english",
+      "track": "general",
+      "language": "en",
+      "year_guidance": [
+        1,
+        2,
+        3
+      ],
+      "levels": [
+        "ordinary",
+        "higher"
+      ],
+      "strand": "Reading",
+      "outcome_mapping_status": "candidate_unreviewed",
+      "prompt": "Which sentence uses a simile?",
+      "options": [
+        {
+          "id": "A",
+          "text": "The bell was a warning."
+        },
+        {
+          "id": "B",
+          "text": "The corridor buzzed like a hive."
+        },
+        {
+          "id": "C",
+          "text": "The bell rang at noon."
+        },
+        {
+          "id": "D",
+          "text": "Close the door."
+        }
+      ],
+      "correct_option_id": "B",
+      "explanation": "Like a hive explicitly compares the busy sound of the corridor to a hive.",
+      "hints": [
+        "Look for an explicit comparison.",
+        "Which sentence uses like to compare two things?"
+      ],
+      "help_lesson_id": "lesson-simile",
+      "provenance": "Original ScoilMate draft; not copied or adapted from an examination paper."
+    },
+    {
+      "id": "q-purpose",
+      "version": 1,
+      "status": "draft",
+      "review_status": "unreviewed",
+      "subject": "english",
+      "track": "general",
+      "language": "en",
+      "year_guidance": [
+        1,
+        2,
+        3
+      ],
+      "levels": [
+        "ordinary",
+        "higher"
+      ],
+      "strand": "Writing",
+      "outcome_mapping_status": "candidate_unreviewed",
+      "prompt": "Which sentence best supports a request for a sheltered bicycle rack?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Bicycles have two wheels."
+        },
+        {
+          "id": "B",
+          "text": "Some bicycles are blue."
+        },
+        {
+          "id": "C",
+          "text": "A shelter would keep students’ saddles dry during rain."
+        },
+        {
+          "id": "D",
+          "text": "Yesterday was Tuesday."
+        }
+      ],
+      "correct_option_id": "C",
+      "explanation": "It gives a benefit relevant to people who cycle to school.",
+      "hints": [
+        "Think about what would persuade a school to provide a shelter.",
+        "Which choice explains a practical benefit?"
+      ],
+      "help_lesson_id": "lesson-purpose",
+      "provenance": "Original ScoilMate draft; not copied or adapted from an examination paper."
+    },
+    {
+      "id": "q-inference",
+      "version": 1,
+      "status": "draft",
+      "review_status": "unreviewed",
+      "subject": "english",
+      "track": "general",
+      "language": "en",
+      "year_guidance": [
+        1,
+        2,
+        3
+      ],
+      "levels": [
+        "ordinary",
+        "higher"
+      ],
+      "strand": "Reading",
+      "outcome_mapping_status": "candidate_unreviewed",
+      "prompt": "Original micro-text: “Nora checked the clock twice and hurried towards the bus stop.” Which inference is best supported?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Nora may be worried about missing the bus."
+        },
+        {
+          "id": "B",
+          "text": "Nora owns the bus."
+        },
+        {
+          "id": "C",
+          "text": "Nora dislikes all journeys."
+        },
+        {
+          "id": "D",
+          "text": "Nora has already missed three buses."
+        }
+      ],
+      "correct_option_id": "A",
+      "explanation": "Clock-checking and hurrying support possible concern about time; the other claims lack evidence.",
+      "hints": [
+        "Use only details in the sentence.",
+        "Checking time and hurrying can suggest urgency."
+      ],
+      "help_lesson_id": "lesson-inference",
+      "provenance": "Original ScoilMate draft; not copied or adapted from an examination paper."
+    },
+    {
+      "id": "q-ga-message",
+      "version": 1,
+      "status": "draft",
+      "review_status": "unreviewed",
+      "subject": "gaeilge",
+      "track": "T2",
+      "language": "ga",
+      "year_guidance": [
+        1,
+        2,
+        3
+      ],
+      "levels": [
+        "ordinary",
+        "higher"
+      ],
+      "strand": "Communicative competence",
+      "outcome_mapping_status": "candidate_unreviewed",
+      "prompt": "“Beidh an club staire sa leabharlann ag a ceathair.” Cá mbeidh an club?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Sa halla."
+        },
+        {
+          "id": "B",
+          "text": "Sa pháirc."
+        },
+        {
+          "id": "C",
+          "text": "Sa seomra ceoil."
+        },
+        {
+          "id": "D",
+          "text": "Sa leabharlann."
+        }
+      ],
+      "correct_option_id": "D",
+      "explanation": "Deir an teachtaireacht go mbeidh an club sa leabharlann.",
+      "hints": [
+        "Tá an cheist ag lorg áite.",
+        "Féach ar an bhfocal leabharlann."
+      ],
+      "help_lesson_id": "lesson-ga-message",
+      "provenance": "Original ScoilMate draft; not copied or adapted from an examination paper."
+    },
+    {
+      "id": "q-ga-time",
+      "version": 1,
+      "status": "draft",
+      "review_status": "unreviewed",
+      "subject": "gaeilge",
+      "track": "T2",
+      "language": "ga",
+      "year_guidance": [
+        1,
+        2,
+        3
+      ],
+      "levels": [
+        "ordinary",
+        "higher"
+      ],
+      "strand": "Communicative competence",
+      "outcome_mapping_status": "candidate_unreviewed",
+      "prompt": "“D’imir mé peil inné.” Cathain a d’imir an duine peil?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Amárach."
+        },
+        {
+          "id": "B",
+          "text": "Inné."
+        },
+        {
+          "id": "C",
+          "text": "Gach lá."
+        },
+        {
+          "id": "D",
+          "text": "An tseachtain seo chugainn."
+        }
+      ],
+      "correct_option_id": "B",
+      "explanation": "Ciallaíonn inné an lá roimh inniu. Tá an leid ama san abairt.",
+      "hints": [
+        "Lorg an focal a insíonn cathain a tharla sé.",
+        "Cé acu rogha atá le fáil san abairt féin?"
+      ],
+      "help_lesson_id": "lesson-ga-time",
+      "provenance": "Original ScoilMate draft; not copied or adapted from an examination paper."
+    },
+    {
+      "id": "q-ga-register",
+      "version": 1,
+      "status": "draft",
+      "review_status": "unreviewed",
+      "subject": "gaeilge",
+      "track": "T1",
+      "language": "ga",
+      "year_guidance": [
+        1,
+        2,
+        3
+      ],
+      "levels": [
+        "ordinary",
+        "higher"
+      ],
+      "strand": "Language and cultural awareness",
+      "outcome_mapping_status": "candidate_unreviewed",
+      "prompt": "Tá dalta ag scríobh iarratas foirmiúil chuig an bpríomhoide. Cén tús is oiriúnaí?",
+      "options": [
+        {
+          "id": "A",
+          "text": "A Phríomhoide, ba mhaith liom cead a iarraidh..."
+        },
+        {
+          "id": "B",
+          "text": "Haigh a chara, cad é an scéal?"
+        },
+        {
+          "id": "C",
+          "text": "Bhuel, éist anseo liom!"
+        },
+        {
+          "id": "D",
+          "text": "Tabhair cead dom anois!"
+        }
+      ],
+      "correct_option_id": "A",
+      "explanation": "Tá an chéad rogha cúirtéiseach agus oiriúnach d’iarratas foirmiúil.",
+      "hints": [
+        "Smaoinigh ar cé a léifidh an t-iarratas.",
+        "Lorg beannacht agus iarratas cúirtéiseach."
+      ],
+      "help_lesson_id": "lesson-ga-register",
+      "provenance": "Original ScoilMate draft; not copied or adapted from an examination paper."
+    },
+    {
+      "id": "q-primary",
+      "version": 1,
+      "status": "draft",
+      "review_status": "unreviewed",
+      "subject": "history",
+      "track": "general",
+      "language": "en",
+      "year_guidance": [
+        1,
+        2,
+        3
+      ],
+      "levels": [
+        "common"
+      ],
+      "strand": "The nature of history",
+      "outcome_mapping_status": "candidate_unreviewed",
+      "prompt": "A historian investigates a town market in 1910. Which is most directly a primary source for that investigation?",
+      "options": [
+        {
+          "id": "A",
+          "text": "A textbook written in 2020."
+        },
+        {
+          "id": "B",
+          "text": "A modern novel set in 1910."
+        },
+        {
+          "id": "C",
+          "text": "A market trader’s diary entry written in 1910."
+        },
+        {
+          "id": "D",
+          "text": "A film review published last week."
+        }
+      ],
+      "correct_option_id": "C",
+      "explanation": "The contemporary diary is direct evidence from the period; it still needs evaluation and corroboration.",
+      "hints": [
+        "Consider when each source was produced.",
+        "Which source was created during the period under investigation?"
+      ],
+      "help_lesson_id": "lesson-primary",
+      "provenance": "Original ScoilMate draft; not copied or adapted from an examination paper."
+    },
+    {
+      "id": "q-corroboration",
+      "version": 1,
+      "status": "draft",
+      "review_status": "unreviewed",
+      "subject": "history",
+      "track": "general",
+      "language": "en",
+      "year_guidance": [
+        1,
+        2,
+        3
+      ],
+      "levels": [
+        "common"
+      ],
+      "strand": "The nature of history",
+      "outcome_mapping_status": "candidate_unreviewed",
+      "prompt": "Two accounts give different dates for a local meeting. What is the best next step?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Choose whichever account is longer."
+        },
+        {
+          "id": "B",
+          "text": "Look for independent contemporary evidence and compare origins."
+        },
+        {
+          "id": "C",
+          "text": "Assume both authors lied."
+        },
+        {
+          "id": "D",
+          "text": "Use the date in the newer book without checking."
+        }
+      ],
+      "correct_option_id": "B",
+      "explanation": "Independent evidence and source origins help assess conflicting accounts; length or publication recency alone does not settle it.",
+      "hints": [
+        "Think about testing a claim rather than guessing.",
+        "Can another source help check the dates?"
+      ],
+      "help_lesson_id": "lesson-corroboration",
+      "provenance": "Original ScoilMate draft; not copied or adapted from an examination paper."
+    },
+    {
+      "id": "q-continuity",
+      "version": 1,
+      "status": "draft",
+      "review_status": "unreviewed",
+      "subject": "history",
+      "track": "general",
+      "language": "en",
+      "year_guidance": [
+        1,
+        2,
+        3
+      ],
+      "levels": [
+        "common"
+      ],
+      "strand": "The nature of history",
+      "outcome_mapping_status": "candidate_unreviewed",
+      "prompt": "A town’s market moved indoors in 1950, but continued to open every Saturday. Which detail shows continuity?",
+      "options": [
+        {
+          "id": "A",
+          "text": "The market moved indoors."
+        },
+        {
+          "id": "B",
+          "text": "The building changed."
+        },
+        {
+          "id": "C",
+          "text": "The move happened in 1950."
+        },
+        {
+          "id": "D",
+          "text": "The market still opened every Saturday."
+        }
+      ],
+      "correct_option_id": "D",
+      "explanation": "The Saturday schedule persisted even though the location changed.",
+      "hints": [
+        "Look for what stayed the same.",
+        "Which detail describes an unchanged routine?"
+      ],
+      "help_lesson_id": "lesson-continuity",
+      "provenance": "Original ScoilMate draft; not copied or adapted from an examination paper."
+    }
+  ]
+}

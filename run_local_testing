@@ -1,0 +1,51 @@
+#!/usr/bin/env bash
+# Direct HTTP preview for trusted local/LAN testing ONLY. No proxy-header trust.
+set -euo pipefail
+ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+cd "$ROOT"
+if [[ -x "$ROOT/.venv/bin/python" ]]; then
+  PYTHON="$ROOT/.venv/bin/python"
+else
+  PYTHON="$(command -v python3 || true)"
+fi
+if [[ -z "$PYTHON" ]]; then echo 'Python 3 is required.' >&2; exit 1; fi
+export HOST="${HOST:-0.0.0.0}" PORT="${PORT:-8000}" RELOAD="${RELOAD:-0}"
+"$PYTHON" - <<'PY'
+import ipaddress, os, socket, sys
+host, port, reload = (os.environ[k] for k in ('HOST','PORT','RELOAD'))
+try:
+    ipaddress.ip_address(host)
+    if not port.isascii() or not port.isdecimal() or not 1 <= int(port) <= 65535:
+        raise ValueError('PORT must be a decimal integer in 1..65535')
+    if reload not in ('0','1'):
+        raise ValueError('RELOAD must be 0 or 1')
+except ValueError as exc:
+    sys.exit(f'Invalid local testing settings: {exc}; HOST must be an IPv4/IPv6 address.')
+try:
+    import fastapi, uvicorn
+except ImportError:
+    sys.exit('Preview dependencies missing. Run: python3 -m venv .venv && .venv/bin/python -m pip install -r requirements.txt')
+port=int(port)
+print('ScoilMate PREVIEW: direct HTTP, trusted local testing only. No proxy-header trust.',flush=True)
+print(f'Loopback: http://127.0.0.1:{port}/ (reachable only when bound to IPv4 loopback/all interfaces)',flush=True)
+print(f'Bind address: [{host}]:{port}',flush=True)
+addresses=set()
+try:
+    for family, _, _, _, address in socket.getaddrinfo(socket.gethostname(), None, type=socket.SOCK_STREAM):
+        ip=ipaddress.ip_address(address[0])
+        if not ip.is_loopback and not ip.is_unspecified: addresses.add(str(ip))
+except OSError:
+    pass
+try:
+    import subprocess
+    addresses.update(ip for ip in subprocess.check_output(['hostname','-I'],text=True,timeout=2).split() if not ipaddress.ip_address(ip).is_loopback)
+except (OSError,ValueError,subprocess.SubprocessError):
+    pass
+for ip in sorted(addresses):
+    shown=f'[{ip}]' if ':' in ip else ip
+    print(f'Discovered host/LAN candidate: http://{shown}:{port}/',flush=True)
+print('Address discovery is best effort: isolation/container routing and firewall may prevent LAN access. No firewall changes made. Do not expose publicly. Ctrl-C stops the preview.',flush=True)
+PY
+args=(scoilmate.app:app --host "$HOST" --port "$PORT" --no-proxy-headers)
+if [[ "$RELOAD" == 1 ]]; then args+=(--reload); fi
+exec "$PYTHON" -m uvicorn "${args[@]}"

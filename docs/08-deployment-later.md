@@ -1,0 +1,12 @@
+# ScoilMate: deferred deployment shape
+**No nginx, systemd, scheduler, firewall, DNS or running service was inspected or changed for deployment. This is not an executable deployment runbook.**
+
+For trusted LAN testing now, executable `run_local_testing` runs the minimal preview directly on Uvicorn (default 0.0.0.0:8000), without forwarded proxy trust. Direct HTTP is not a production path. A temporary loopback smoke-test process was stopped; no server is left running.
+
+Later, after approval: one host, nginx terminating TLS and serving local assets; proxy only to Uvicorn on loopback or a Unix socket; FastAPI process under unprivileged dedicated service account with read-only code and write access only to persistent data directory. SQLite file/WAL/SHM outside document root; local disk, restrictive permissions; secrets injected outside repository. One worker initially; no --reload in production. Use supported Uvicorn process management; do not copy deprecated uvicorn.workers advice blindly.
+
+nginx eventually handles trusted host/TLS redirects, size/time limits and coarse rate limiting; app retains account-aware limits, sessions/CSRF/authorisation. Trust forwarded headers only from known proxy. HTTPS cookie/security headers tested end-to-end, not just localhost. No CDN/external asset/tracking service required. Domain, certificate provisioning, EEA hosting/data location, storage capacity, monitoring recipients and incident responsibility are unresolved.
+
+Before any changes: inspect existing nginx/sites/ports/services and preserve/merge, never overwrite current host config. Test candidate config, stage, verify routing/cookies/proxy headers and ensure DB/backup URLs are inaccessible. Migrations performed once in a controlled maintenance step with a tested consistent backup. Health endpoint should not expose secrets/student data; readiness detects DB availability without excessive writes. Monitor disk/WAL growth, locks, failed auth, latency and backup age with minimal logs.
+
+Proposed pilot recovery targets for approval: RPO 24 hours, RTO 4 hours; encrypted daily consistent snapshots with 30-day rotation and regular isolated restore drills. No scheduled jobs created now. Restore procedure must replay erasure records before admitting users. Rollback pairs compatible code and schema; do not run untested destructive downgrade. A single host is not high availability. Production deployment, GitHub push and any spending need separate explicit authorisation.
