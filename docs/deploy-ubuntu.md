@@ -66,11 +66,26 @@ sudo systemctl start scoilmate
 ``` Copy backups off the server too. Backups hold student progress: treat them as personal data.
 
 ## Updating
+Updates are one script. It never touches the nginx site, the certificates, the settings file or the live database.
 ```sh
-cd /path/to/scoilmate && git pull
-sudo DOMAIN=scoilmate.example.ie ./deploy/install-ubuntu.sh
+cd /home/you/scoilmate                       # your checkout on the server
+git pull
+sudo ./deploy/update-ubuntu.sh
 ```
-Migrations run automatically on restart. Take a backup first.
+What it does, in order:
+1. Checks the checkout compiles, nginx's config is valid, and the checkout has no uncommitted changes (override with `ALLOW_DIRTY=1` only if you know why).
+2. Backs up the database to `/var/lib/scoilmate/backups/pre-update-<time>.db`. If the backup fails, nothing else happens.
+3. Keeps the current code in `/opt/scoilmate.prev` for rollback.
+4. Copies the new code over `/opt/scoilmate`, keeping `.venv` and any instance data.
+5. Updates the Python packages in the existing venv.
+6. Installs the systemd unit only if it changed.
+7. Stops the service, runs migrations and the content import, starts it, and waits for `/health` to say `ok`.
+
+If anything fails after step 2, it restores the database backup and the previous code, starts the service again, and exits with an error. Then check `journalctl -u scoilmate -n 80`.
+
+After an update, check the public site: `curl -fsSI https://scoilmate.example.ie/`.
+
+**nginx or certificate changes are not applied by an update.** If `deploy/nginx-https.conf` changes, re-run `sudo DOMAIN=scoilmate.example.ie ./deploy/install-ubuntu.sh`. It backs up the current site before replacing it. Renewing certificates is handled by certbot's timer, not by this script.
 
 ## Troubleshooting
 - **Login refused:** check `journalctl -u scoilmate`. Repeated failures lock the account for 15 minutes.

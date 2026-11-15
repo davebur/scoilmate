@@ -113,9 +113,35 @@ Checks validate JSON structure, unique identifiers, allowed subject/track/level 
 
 Repository: `~/coding/scoilmate` (its own `.git`, independent of the surrounding workspace). GitHub, licence selection, domain, hosting, TLS, dependency lockfile, full learning-application implementation and any production deployment require a later decision. No open-source licence is selected merely by writing this plan; do not publish the materials before Dave decides licensing and the content is reviewed.
 
+## Install and update from GitHub
+
+The repository is `git@github.com:davebur/scoilmate.git`. Use a read-only GitHub deploy key on the server (Settings → Deploy keys on the repo), so the server can pull but cannot push.
+
+**First install on a server (Ubuntu):**
+```sh
+ssh-keygen -t ed25519 -f ~/.ssh/scoilmate_deploy -N ""     # then add the .pub as a read-only deploy key
+cat >> ~/.ssh/config <<'CFG'
+Host github.com
+  IdentityFile ~/.ssh/scoilmate_deploy
+  IdentitiesOnly yes
+CFG
+git clone git@github.com:davebur/scoilmate.git ~/scoilmate
+cd ~/scoilmate
+sudo DOMAIN=scoilmate.example.ie ./deploy/install-ubuntu.sh
+sudo ./deploy/init-admin.sh your-login --name "Your Name"
+```
+Full steps, including the HTTP-then-HTTPS certificate order, are in [docs/deploy-ubuntu.md](docs/deploy-ubuntu.md).
+
+**Updating a running server:**
+```sh
+cd ~/scoilmate && git pull
+sudo ./deploy/update-ubuntu.sh
+```
+The update backs up the database first, keeps the previous code for rollback, and never changes the nginx site, the certificates, `/etc/scoilmate/scoilmate.env` or the live database. Details are in [docs/deploy-ubuntu.md](docs/deploy-ubuntu.md#updating).
+
 ## Server deployment
 
-Ubuntu install with uvicorn (systemd) behind nginx with HTTPS, and creating the first admin: see [docs/deploy-ubuntu.md](docs/deploy-ubuntu.md). Files are in `deploy/`: `install-ubuntu.sh`, `init-admin.sh`, `scoilmate.service`, `nginx-http.conf`, `nginx-https.conf`, `scoilmate-proxy.conf`, `scoilmate.env.example`.
+Ubuntu install with uvicorn (systemd) behind nginx with HTTPS, and creating the first admin: see [docs/deploy-ubuntu.md](docs/deploy-ubuntu.md). Files are in `deploy/`: `install-ubuntu.sh`, `update-ubuntu.sh`, `init-admin.sh`, `scoilmate.service`, `nginx-http.conf`, `nginx-https.conf`, `scoilmate-proxy.conf`, `scoilmate.env.example`.
 
 ## Code style and lint
 
