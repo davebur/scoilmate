@@ -22,7 +22,7 @@ from .views_learning import router as learning_router
 from .web import PKG, render
 
 ROOT = PKG.parent
-CSP = ("default-src 'self'; script-src 'none'; img-src 'self'; style-src 'self'; form-action 'self'; "
+CSP = ("default-src 'self'; script-src 'self'; img-src 'self'; style-src 'self'; form-action 'self'; "
        "frame-ancestors 'none'; base-uri 'none'; object-src 'none'")
 
 app = FastAPI(title='ScoilMate', docs_url=None, redoc_url=None, openapi_url=None,

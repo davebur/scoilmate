@@ -23,15 +23,17 @@ class PublicPageTests(unittest.TestCase):
     def test_security_headers(self):
         h = self.client.get('/').headers
         csp = h['Content-Security-Policy']
-        self.assertIn("script-src 'none'", csp)
+        self.assertIn("script-src 'self'", csp)
         self.assertNotIn('unsafe-inline', csp)
         self.assertEqual(h['X-Frame-Options'], 'DENY')
         self.assertEqual(h['X-Content-Type-Options'], 'nosniff')
         self.assertEqual(h['Cache-Control'], 'no-store')
 
     def test_no_inline_scripts_anywhere(self):
+        import re
         for path in ['/', '/login']:
-            self.assertNotIn('<script', self.client.get(path).text.lower())
+            text = self.client.get(path).text.lower()
+            self.assertIsNone(re.search(r'<script(?![^>]*\ssrc=)', text))  # every script tag is external
 
     def test_unknown_routes_404(self):
         for path in ['/nope', '/practice/maths', '/static/app/missing.css']:

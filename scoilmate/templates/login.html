@@ -6,8 +6,9 @@
 <form method="post" action="/login" class="card narrow">
 {% include "_csrf.html" %}<input type="hidden" name="next" value="{{ next }}">
 <label>Login name <input name="login" value="{{ login or '' }}" autocomplete="username" autocapitalize="none" required maxlength="64"></label>
-<label>Password <input name="password" type="password" autocomplete="current-password" required maxlength="128"></label>
+<label>Password <span class="password-field"><input id="login-password" name="password" type="password" autocomplete="current-password" required maxlength="128"><button type="button" class="pw-toggle" data-password-toggle aria-controls="login-password" aria-label="Show password" aria-pressed="false" title="Show or hide password">👁</button></span></label>
 <button class="button">Log in</button>
 </form>
+<script src="/static/app/password-toggle.js" defer></script>
 <p class="small">Accounts are made by a parent or the site admin; there is no public sign-up. Forgotten your password? Ask the parent or admin who set up your account to reset it.</p>
 {% endblock %}
