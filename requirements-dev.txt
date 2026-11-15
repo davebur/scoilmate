@@ -1,0 +1,6 @@
+# Developer checks only (formatting, lint). Not needed to run the app.
+-r requirements.txt
+black==26.10.1
+pycodestyle==2.15.0
+pylint==4.1.4
+ruff==0.17.5

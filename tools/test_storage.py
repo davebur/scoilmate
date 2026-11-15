@@ -3,15 +3,15 @@ backup/restore. Run: .venv/bin/python -m unittest discover -s tools -p 'test_*.p
 """
 
 import json
+import sqlite3
 import unittest
 
 try:
     import testutil
     from sqlalchemy import func, select, text, update
-    from sqlalchemy.exc import IntegrityError, OperationalError
+    from sqlalchemy.exc import IntegrityError
 
     from scoilmate import content, db
-    from scoilmate.config import settings
     from scoilmate.models import (
         Base,
         ContentItem,
@@ -23,7 +23,7 @@ try:
         User,
     )
 except ImportError as exc:
-    raise unittest.SkipTest(f"dependencies unavailable: {exc}")
+    raise unittest.SkipTest(f"dependencies unavailable: {exc}") from exc
 
 
 def make_student(s, login="demo-student"):
@@ -203,7 +203,7 @@ class StorageTests(unittest.TestCase):
     def test_restore_rejects_corrupt_file(self):
         bad = testutil.TMP / "corrupt.db"
         bad.write_bytes(b"not a database" * 100)
-        with self.assertRaises(Exception):
+        with self.assertRaises(sqlite3.DatabaseError):
             db.restore(bad)
         with db.session_scope() as s:  # live DB untouched
             self.assertEqual(s.scalar(select(func.count()).select_from(ContentVersion)), 18)

@@ -31,9 +31,9 @@ with tempfile.TemporaryFile(mode="w+") as log:
                 with urllib.request.urlopen(f"http://127.0.0.1:{port}/health", timeout=1) as r:
                     assert json.load(r) == {"status": "ok", "app": "ScoilMate", "mode": "preview"}
                 break
-            except OSError:
+            except OSError as exc:
                 if proc.poll() is not None:
-                    raise RuntimeError("Preview exited")
+                    raise RuntimeError("Preview exited") from exc
                 time.sleep(0.1)
         else:
             raise RuntimeError("Preview did not become ready")
@@ -71,6 +71,7 @@ for bad in ({"PORT": "0"}, {"PORT": "abc"}, {"HOST": "not-a-host"}, {"RELOAD": "
         capture_output=True,
         text=True,
         timeout=10,
+        check=False,
     )
     assert result.returncode != 0 and "Invalid local testing settings" in result.stderr
 print("PASS invalid settings rejected")

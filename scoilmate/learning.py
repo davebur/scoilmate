@@ -43,8 +43,14 @@ LABELS = {
 RULES = {
     "not_started": "You have not practised this topic yet.",
     "attempted": "Attempted: under 70% in your last practice of this topic.",
-    "familiar": "Familiar: 70% or more in your last practice of this topic (or a slip in a mixed review).",
-    "proficient": "Proficient: everything right first time in your last practice (one answer with one hint is OK).",
+    "familiar": (
+        "Familiar: 70% or more in your last practice of this topic "
+        "(or a slip in a mixed review)."
+    ),
+    "proficient": (
+        "Proficient: everything right first time in your last practice "
+        "(one answer with one hint is OK)."
+    ),
     "mastered": "Mastered: Proficient, then right again in a mixed review at least 3 days later.",
 }
 CREDIT_RULE = (
@@ -102,7 +108,8 @@ def _describe(results, score) -> str:
     n = len(results)
     own = sum(1 for c, h in results if c and not h)
     hinted = sum(1 for c, h in results if c and h)
-    return f"{own} of {n} right first time on your own, {hinted} with hints (score {round(score * 100)}%)."
+    pct = round(score * 100)
+    return f"{own} of {n} right first time on your own, {hinted} with hints (score {pct}%)."
 
 
 def apply_topic_set(st: TopicState, at: datetime, results: list[tuple[bool, int]]):
@@ -114,7 +121,10 @@ def apply_topic_set(st: TopicState, at: datetime, results: list[tuple[bool, int]
     elif prev != "not_started" and rank(earned) < rank(prev):
         new = LEVELS[max(rank(earned), rank(prev) - 1)]  # never drop more than one step at a time
         st.mastered_reviews = 0
-        why = f"Moved one step from {LABELS[prev]} to {LABELS[new]} (levels only move one step at a time)."
+        why = (
+            f"Moved one step from {LABELS[prev]} to {LABELS[new]} "
+            "(levels only move one step at a time)."
+        )
     else:
         new = earned
         why = RULES[new]
@@ -366,8 +376,8 @@ def answer(db: Session, item: PracticeItem, option: str) -> tuple[dict, bool]:
     """Grade on the server. Only the first answer is stored; retries are practice only."""
     try:
         result = content.grade(item.question, option)
-    except ValueError:
-        raise HTTPException(400, "Invalid answer option")
+    except ValueError as exc:
+        raise HTTPException(400, "Invalid answer option") from exc
     first = item.response is None and item.set.completed_at is None
     if first:
         hints = len(item.hints)

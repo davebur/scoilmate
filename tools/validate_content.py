@@ -64,5 +64,6 @@ if __name__ == "__main__":
     path = Path(__file__).resolve().parents[1] / "content/draft-samples.json"
     counts = validate(json.loads(path.read_text()))
     print(
-        f"PASS: {counts[0]} lessons, {counts[1]} MCQs; keys, links, draft status and eligibility valid."
+        f"PASS: {counts[0]} lessons, {counts[1]} MCQs; "
+        "keys, links, draft status and eligibility valid."
     )

@@ -8,7 +8,7 @@ try:
     import testutil
     from testutil import Client
 except ImportError as exc:  # system python without the venv
-    raise unittest.SkipTest(f"dependencies unavailable: {exc}")
+    raise unittest.SkipTest(f"dependencies unavailable: {exc}") from exc
 
 
 class PublicPageTests(unittest.TestCase):

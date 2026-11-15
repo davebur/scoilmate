@@ -44,7 +44,7 @@ def _set(
     )
     when = utcnow() - timedelta(days=days_ago, hours=2)
     ps.started_at = when
-    for item, (ok, hints) in zip(ps.items, plan):
+    for item, (ok, hints) in zip(ps.items, plan, strict=False):
         d = item.question.data
         for h in range(hints):
             item.hints.append(HintEvent(ordinal=h + 1, at=when))
@@ -69,7 +69,10 @@ def _set(
 
 
 def _demo_ratings(db: Session):
-    """A few anonymous ratings so the admin ratings queue has something to show (only on an empty table)."""
+    """A few anonymous ratings so the admin ratings queue has something to show.
+
+    Only runs on an empty ratings table.
+    """
     from .models import ContentItem, ContentRating
 
     if db.scalar(select(ContentRating.id).limit(1)):
@@ -105,9 +108,10 @@ def seed(db: Session, reset: bool = False) -> dict[str, str]:
     old = settings.allow_draft_practice
     settings.allow_draft_practice = True
     try:
-        mk = lambda role, login, name, **kw: accounts.create_user(
-            db, None, role, login, name, PASSWORDS[login], **kw
-        )
+
+        def mk(role, login, name, **kw):
+            return accounts.create_user(db, None, role, login, name, PASSWORDS[login], **kw)
+
         mk("admin", "demo-admin", "Demo Admin")
         p1 = mk("parent", "demo-parent1", "Demo Parent One", email="parent1@example.invalid")
         p2 = mk("parent", "demo-parent2", "Demo Parent Two", email="parent2@example.invalid")

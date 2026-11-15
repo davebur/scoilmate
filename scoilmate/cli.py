@@ -4,7 +4,8 @@ python -m scoilmate.cli migrate                 # apply Alembic migrations (run 
 python -m scoilmate.cli import-content [file]   # import editorial JSON as draft versions
 python -m scoilmate.cli import-ratings [file]   # move step-1 JSONL ratings into the database
 python -m scoilmate.cli backup [--out FILE]     # online backup (SQLite backup API)
-python -m scoilmate.cli restore FILE            # replace the database with a backup (server stopped!)
+python -m scoilmate.cli restore FILE            # replace the database with a backup
+                                                # (server must be stopped)
 python -m scoilmate.cli create-admin LOGIN [--name NAME]
     # prompts for the password; or reads SCOILMATE_ADMIN_PASSWORD (tests/automation)
 python -m scoilmate.cli seed-demo [--reset]     # clearly fake demo accounts + practice history
@@ -84,7 +85,8 @@ def cmd_create_admin(args):
             if existing is not None:
                 if existing.role != "admin" or not args.reset:
                     sys.exit(
-                        "That login exists. Use --reset to set a new password for an existing admin."
+                        "That login exists. Use --reset to set a new password "
+                        "for an existing admin."
                     )
                 accounts.reset_access(s, None, existing, password)
                 print(f"Password reset for admin {existing.login}.")
@@ -102,7 +104,8 @@ def cmd_seed_demo(args):
 
     if settings.secure_cookies and not args.force:
         sys.exit(
-            "Refusing to add demo accounts with known passwords to an HTTPS deployment (use --force)."
+            "Refusing to add demo accounts with known passwords "
+            "to an HTTPS deployment (use --force)."
         )
     db.migrate()
     try:

@@ -227,7 +227,7 @@ async def admin_settings(
             form.get("display_name"),
         )
     except ValueError as exc:
-        raise HTTPException(400, str(exc))
+        raise HTTPException(400, str(exc)) from exc
     return see_other(f"/admin/users/{target.id}?saved=1")
 
 
@@ -275,7 +275,7 @@ def admin_status(
     try:
         accounts.set_active(db, user, target, active == "1")
     except ValueError as exc:
-        raise HTTPException(400, str(exc))
+        raise HTTPException(400, str(exc)) from exc
     return see_other(f"/admin/users/{target.id}")
 
 
@@ -293,7 +293,7 @@ def admin_delete(
     try:
         orphans = accounts.delete_user(db, user, target)
     except ValueError as exc:
-        raise HTTPException(400, str(exc))
+        raise HTTPException(400, str(exc)) from exc
     return render(request, "deleted.html", role=target.role, orphans=orphans)
 
 
@@ -390,7 +390,7 @@ async def parent_settings(
             form.get("display_name"),
         )
     except ValueError as exc:
-        raise HTTPException(400, str(exc))
+        raise HTTPException(400, str(exc)) from exc
     return see_other(f"/parent/children/{child.id}?saved=1")
 
 
@@ -467,5 +467,5 @@ async def my_settings_save(
             accounts.parse_subjects(form),
         )
     except ValueError as exc:
-        raise HTTPException(400, str(exc))
+        raise HTTPException(400, str(exc)) from exc
     return see_other("/me/settings?saved=1")

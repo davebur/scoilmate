@@ -116,3 +116,15 @@ Repository: `~/coding/scoilmate` (its own `.git`, independent of the surrounding
 ## Server deployment
 
 Ubuntu install with uvicorn (systemd) behind nginx with HTTPS, and creating the first admin: see [docs/deploy-ubuntu.md](docs/deploy-ubuntu.md). Files are in `deploy/`: `install-ubuntu.sh`, `init-admin.sh`, `scoilmate.service`, `nginx-http.conf`, `nginx-https.conf`, `scoilmate-proxy.conf`, `scoilmate.env.example`.
+
+## Code style and lint
+
+Config is in `pyproject.toml` (line length 100). Developer tools are in `requirements-dev.txt`; install them into the project venv only:
+```sh
+.venv/bin/python -m pip install -r requirements-dev.txt
+.venv/bin/python -m black --check scoilmate tools      # formatting (drop --check to apply)
+.venv/bin/python -m ruff check scoilmate tools          # imports, bugs, style rules
+.venv/bin/python -m pycodestyle scoilmate tools         # PEP 8
+.venv/bin/python -m pylint scoilmate tools              # code quality (rated about 9.9/10)
+```
+Black, ruff and pycodestyle must pass cleanly. Pylint's remaining messages are mostly minor naming and subprocess notes; the disabled checks are listed with reasons in `pyproject.toml`.

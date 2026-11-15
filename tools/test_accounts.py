@@ -14,12 +14,12 @@ try:
     from testutil import PASSWORD, Client, make_user
 
     from scoilmate import db
-    from scoilmate.app import app
+    from scoilmate.app import app  # noqa: F401  (import check)
     from scoilmate.config import settings
     from scoilmate.db import utcnow
     from scoilmate.models import AuditLog, AuthSession, ParentStudent, User
 except ImportError as exc:
-    raise unittest.SkipTest(f"dependencies unavailable: {exc}")
+    raise unittest.SkipTest(f"dependencies unavailable: {exc}") from exc
 
 
 def audit_actions():
@@ -217,19 +217,25 @@ class PermissionTests(Family):
     def test_no_default_admin_and_cli(self):
         path = testutil.TMP / "cli-admin.db"
         env = dict(os.environ, SCOILMATE_DB=str(path), SCOILMATE_ADMIN_PASSWORD="")
-        run = lambda *a, **kw: subprocess.run(
-            [sys.executable, "-m", "scoilmate.cli", *a],
-            cwd=testutil.ROOT,
-            capture_output=True,
-            text=True,
-            timeout=60,
-            **kw,
-        )
+
+        def run(*a, **kw):
+            return subprocess.run(
+                [sys.executable, "-m", "scoilmate.cli", *a],
+                cwd=testutil.ROOT,
+                capture_output=True,
+                text=True,
+                timeout=60,
+                **kw,
+                check=False,
+            )
+
         self.assertEqual(run("migrate", env=env).returncode, 0)
         import sqlite3
         from contextlib import closing
 
-        q = lambda sql: closing(sqlite3.connect(path)).__enter__().execute(sql).fetchone()
+        def q(sql):
+            return closing(sqlite3.connect(path)).__enter__().execute(sql).fetchone()
+
         self.assertEqual(q("SELECT count(*) FROM user")[0], 0)
         env["SCOILMATE_ADMIN_PASSWORD"] = "short"
         self.assertNotEqual(run("create-admin", "boss", env=env).returncode, 0)

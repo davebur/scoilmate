@@ -7,7 +7,8 @@
 - Burst: ~30 students answer concurrently against a real, temporary Uvicorn server on a random
   loopback port; no lost or duplicated attempts. Then a CLI backup/restore drill of that database.
 
-Other step-8 checks live in test_accounts.py (CSRF missing/wrong on every POST, cross-origin, session
+Other step-8 checks live in test_accounts.py (CSRF missing/wrong on every POST,
+cross-origin, session
 expiry, 429 login limits), test_storage.py (backup/restore drill, corrupt backup rejected),
 test_learning.py (export, erasure, set IDOR) and test_content_workflow.py (authored-content XSS).
 """
@@ -32,7 +33,7 @@ try:
     from scoilmate.config import settings
     from scoilmate.models import ContentItem, PracticeSet, Response, Topic, User
 except ImportError as exc:
-    raise unittest.SkipTest(f"dependencies unavailable: {exc}")
+    raise unittest.SkipTest(f"dependencies unavailable: {exc}") from exc
 
 ROOT = Path(__file__).resolve().parents[1]
 XSS = "<script>alert(1)</script>"
@@ -234,7 +235,7 @@ class BurstTests(unittest.TestCase):
             SCOILMATE_ALLOW_DRAFT_PRACTICE="1",
             SCOILMATE_SECURE_COOKIES="0",
         )
-        log = open(testutil.TMP / "burst-server.log", "w+")
+        log = open(testutil.TMP / "burst-server.log", "w+", encoding="utf-8")
         server = subprocess.Popen(
             [
                 sys.executable,
@@ -372,6 +373,7 @@ class BurstTests(unittest.TestCase):
             capture_output=True,
             text=True,
             timeout=60,
+            check=False,
         )
         self.assertEqual(out.returncode, 0, out.stderr)
         self.assertEqual(oct(backup.stat().st_mode & 0o777), "0o600")
@@ -385,6 +387,7 @@ class BurstTests(unittest.TestCase):
             capture_output=True,
             text=True,
             timeout=60,
+            check=False,
         )
         self.assertEqual(out.returncode, 0, out.stderr)
         with db.session_scope() as s:

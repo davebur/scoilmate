@@ -17,3 +17,21 @@ ignore = ["B008"]  # FastAPI Depends()/Form() defaults are the framework idiom
 
 [tool.pylint.format]
 max-line-length = 100
+
+[tool.pylint.messages_control]
+# Deliberate design choices in this codebase, not defects:
+# - FastAPI route handlers take a current-user dependency they may not use (access checks run in it).
+# - Small data holders and SQLAlchemy models have few public methods by design.
+# - Service functions take explicit arguments (db, user, target, ...) for clarity and testing.
+# - Tests and CLI import lazily or after a try-block dependency check.
+disable = [
+    "C0114", "C0115", "C0116",
+    "unused-argument",
+    "too-few-public-methods",
+    "too-many-arguments",
+    "too-many-positional-arguments",
+    "import-outside-toplevel",
+    "wrong-import-position",
+    "wrong-import-order",
+]
+

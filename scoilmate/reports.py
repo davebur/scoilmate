@@ -143,7 +143,8 @@ def suggestion(rows: list[dict]) -> str:
     for r in rows:
         ready = [t for t in r["topics"] if t["ready"]]
         if ready:
-            return f"Revisit “{ready[0]['topic'].title}” ({r['strand'].title}): it is ready for review."
+            topic = ready[0]["topic"].title
+            return f"Revisit “{topic}” ({r['strand'].title}): it is ready for review."
     for r in rows:
         if r["mixed_ready"] and any(t["level"] == "proficient" for t in r["topics"]):
             return f"Try a mixed review in {r['strand'].title}: it is the way to reach Mastered."

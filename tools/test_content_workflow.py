@@ -1,4 +1,7 @@
-"""Step 7: admin content workflow, preview, review, publish, versioning, retire, ratings queue, wellbeing."""
+"""Step 7: admin content workflow.
+
+Covers preview, review, publish, versioning, retire, ratings queue and wellbeing.
+"""
 
 import html
 import re
@@ -20,7 +23,7 @@ try:
         Topic,
     )
 except ImportError as exc:
-    raise unittest.SkipTest(f"dependencies unavailable: {exc}")
+    raise unittest.SkipTest(f"dependencies unavailable: {exc}") from exc
 
 XSS = "<script>alert(1)</script><img src=x onerror=alert(2)>\"'&"
 TOPIC = "poetic-techniques"
@@ -406,8 +409,8 @@ class WellbeingTests(unittest.TestCase):
         r = Client().get("/wellbeing")
         self.assertEqual(r.status_code, 200)
         for needle in (
-            "https://www.gov.ie/en/department-of-education/publications/wellbeing-support-for-exam-students"
-            "-parents-and-school-staff/",
+            "https://www.gov.ie/en/department-of-education/publications/"
+            "wellbeing-support-for-exam-students-parents-and-school-staff/",
             "https://jigsaw.ie/",
             "https://spunout.ie/",
             "50808",

@@ -1,4 +1,4 @@
-"""Admin content workflow (draft -> reviewed -> published -> retired), ratings queue, wellbeing page.
+"""Admin content workflow (draft, reviewed, published, retired), ratings queue, wellbeing page.
 
 Every edit inserts a new immutable version; publishing retires the previously published one.
 """
@@ -326,8 +326,8 @@ def preview_check(
     else:
         try:
             result, error = content.grade(v, option), None
-        except ValueError:
-            raise HTTPException(400, "That is not one of the options")
+        except ValueError as exc:
+            raise HTTPException(400, "That is not one of the options") from exc
     return render(
         request,
         "content_preview.html",
@@ -390,8 +390,8 @@ def review(
     now = utcnow()
     try:
         when = datetime.strptime(review_date, "%Y-%m-%d") if review_date else now
-    except ValueError:
-        raise HTTPException(400, "Review date must look like 2026-11-15.")
+    except ValueError as exc:
+        raise HTTPException(400, "Review date must look like 2026-11-15.") from exc
     if when.date() > now.date() or when.date() < v.created_at.date():
         raise HTTPException(
             400, "The review date must be between the day this version was written and today."
@@ -440,9 +440,12 @@ REASON_ORDER = ("wrong", "unclear", "too_hard", "too_easy", "helpful")
 
 def ratings_rows(db: Session, show: str = "open") -> list[dict]:
     """One row per rated version: 👎/👍 counts and down-vote reasons, sorted by 👎 then reason."""
+    # func.sum builds a SQL aggregate (not Python's sum); pylint misreads it as returning None.
+    # pylint: disable=assignment-from-no-return
     down = func.sum(case((ContentRating.rating == "down", 1), else_=0))
     up = func.sum(case((ContentRating.rating == "up", 1), else_=0))
     open_ = func.sum(case((ContentRating.resolved_at.is_(None), 1), else_=0))
+    # pylint: enable=assignment-from-no-return
     q = select(
         ContentRating.version_id,
         down,

@@ -8,7 +8,7 @@ from datetime import datetime, timedelta
 
 try:
     import testutil
-    from sqlalchemy import func, select, update
+    from sqlalchemy import func, select
     from testutil import Client, make_user
 
     from scoilmate import db, learning
@@ -24,10 +24,9 @@ try:
         RatingReceipt,
         Response,
         TopicProgress,
-        User,
     )
 except ImportError as exc:
-    raise unittest.SkipTest(f"dependencies unavailable: {exc}")
+    raise unittest.SkipTest(f"dependencies unavailable: {exc}") from exc
 
 DATA = json.loads((testutil.ROOT / "content/draft-samples.json").read_text())
 BY_PROMPT = {q["prompt"]: q for q in DATA["questions"]}
@@ -175,7 +174,7 @@ class PracticeFlowTests(Practice):
                 self.assertNotIn(q["explanation"], html)
                 self.assertNotIn(q["hints"][0], html)
                 self.assertNotIn("correct_option", html)
-                for i in range(len(q["hints"]) + 2):  # extra requests are capped
+                for _i in range(len(q["hints"]) + 2):  # extra requests are capped
                     self.c.submit(f"/practice/set/{sid}/q/1/hint")
                 html = self.c.get(f"/practice/set/{sid}/q/1").text
                 for h in q["hints"]:
