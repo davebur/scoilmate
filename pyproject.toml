@@ -1,0 +1,19 @@
+[project]
+name = "scoilmate"
+version = "0.1.0"
+requires-python = ">=3.12"
+
+[tool.black]
+line-length = 100
+target-version = ["py312"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP"]
+ignore = ["B008"]  # FastAPI Depends()/Form() defaults are the framework idiom
+
+[tool.pylint.format]
+max-line-length = 100
