@@ -22,11 +22,12 @@ sudo DOMAIN=scoilmate.example.ie ./deploy/install-ubuntu.sh
 ```
 The script installs packages, creates the `scoilmate` system user, copies the code, builds the venv from `requirements.txt`, runs migrations and imports the content file, then installs and starts the service and the nginx site. It is safe to re-run: existing settings are kept and any changed nginx config is backed up first.
 
-If the certificate is not there yet, the script stops short of enabling HTTPS and prints the commands. Then:
+If there's no certificate yet, the script installs a plain-HTTP site first (`deploy/nginx-http.conf`), which is needed because nginx can't load an HTTPS site without its certificate. Then get the certificate and re-run the script:
 ```sh
-sudo certbot certonly --nginx -d scoilmate.example.ie
-sudo nginx -t && sudo systemctl reload nginx
+sudo certbot certonly --nginx -d scoilmate.example.ie   # DNS must already point at this server
+sudo DOMAIN=scoilmate.example.ie ./deploy/install-ubuntu.sh
 ```
+The second run installs the HTTPS site (`deploy/nginx-https.conf`). This needs nginx 1.25.1 or newer (Ubuntu 24.10 and later, or the nginx.org packages); on older Ubuntu, change `http2 on;` to `listen 443 ssl http2;` in that file.
 
 ## Create the first admin (no demo accounts on a server)
 ```sh

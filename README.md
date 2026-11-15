@@ -115,4 +115,4 @@ Repository: `~/coding/scoilmate` (its own `.git`, independent of the surrounding
 
 ## Server deployment
 
-Ubuntu install with uvicorn (systemd) behind nginx with HTTPS, and creating the first admin: see [docs/deploy-ubuntu.md](docs/deploy-ubuntu.md). Files are in `deploy/`: `install-ubuntu.sh`, `init-admin.sh`, `scoilmate.service`, `nginx.conf`, `scoilmate-proxy.conf`, `scoilmate.env.example`.
+Ubuntu install with uvicorn (systemd) behind nginx with HTTPS, and creating the first admin: see [docs/deploy-ubuntu.md](docs/deploy-ubuntu.md). Files are in `deploy/`: `install-ubuntu.sh`, `init-admin.sh`, `scoilmate.service`, `nginx-http.conf`, `nginx-https.conf`, `scoilmate-proxy.conf`, `scoilmate.env.example`.

@@ -57,21 +57,30 @@ echo '==> nginx reverse proxy'
 install -d /etc/nginx/snippets
 install -m 0644 "$APP/deploy/scoilmate-proxy.conf" /etc/nginx/snippets/scoilmate-proxy.conf
 SITE=/etc/nginx/sites-available/scoilmate.conf
-sed "s/scoilmate.example.ie/$DOMAIN/g" "$APP/deploy/nginx.conf" > "$SITE.new"
+CERT=/etc/letsencrypt/live/$DOMAIN/fullchain.pem
+if [[ -f $CERT ]]; then TEMPLATE=nginx-https.conf; HAVE_CERT=1; else TEMPLATE=nginx-http.conf; HAVE_CERT=0; fi
+sed "s/scoilmate.example.ie/$DOMAIN/g" "$APP/deploy/$TEMPLATE" > "$SITE.new"
+BACKUP=""
 if [[ -f $SITE ]] && ! cmp -s "$SITE" "$SITE.new"; then
-  cp "$SITE" "$SITE.bak.$(date +%Y%m%d%H%M%S)"
-  echo "Previous nginx site backed up."
+  BACKUP="$SITE.bak.$(date +%Y%m%d%H%M%S)"
+  cp "$SITE" "$BACKUP"
 fi
 mv "$SITE.new" "$SITE"
 ln -sf "$SITE" /etc/nginx/sites-enabled/scoilmate.conf
-
-if [[ -f /etc/letsencrypt/live/$DOMAIN/fullchain.pem ]]; then
-  nginx -t && systemctl reload nginx
-  echo "nginx reloaded for https://$DOMAIN/"
+if nginx -t; then
+  systemctl reload nginx
+  echo "nginx reloaded with $TEMPLATE for $DOMAIN."
 else
-  echo "No certificate yet for $DOMAIN. Obtain one, then reload nginx:"
-  echo "  sudo certbot certonly --nginx -d $DOMAIN   # needs DNS for $DOMAIN pointing at this server"
-  echo "  sudo nginx -t && sudo systemctl reload nginx"
+  echo "nginx config test failed; restoring the previous site." >&2
+  if [[ -n $BACKUP ]]; then mv "$BACKUP" "$SITE"; else rm -f /etc/nginx/sites-enabled/scoilmate.conf "$SITE"; fi
+  nginx -t || true
+  exit 1
+fi
+
+if [[ $HAVE_CERT -eq 0 ]]; then
+  echo "No certificate yet for $DOMAIN, so the site is running over HTTP only for now. To add HTTPS:"
+  echo "  sudo certbot certonly --nginx -d $DOMAIN   # DNS for $DOMAIN must already point here"
+  echo "  sudo DOMAIN=$DOMAIN $APP/deploy/install-ubuntu.sh   # re-run: installs the HTTPS config"
 fi
 
 cat <<MSG
@@ -80,5 +89,5 @@ Installed. Next:
   1. Create the first admin:   sudo $APP/deploy/init-admin.sh <admin-login>
      (or from the repo: sudo ./deploy/init-admin.sh <admin-login>)
   2. Check the service:        systemctl status scoilmate ; journalctl -u scoilmate -n 50
-  3. Open https://$DOMAIN/
+  3. Open https://$DOMAIN/ (or http:// until the certificate is installed)
 MSG
