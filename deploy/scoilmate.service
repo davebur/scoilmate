@@ -1,0 +1,37 @@
+# systemd unit for ScoilMate behind nginx. Installed to /etc/systemd/system/scoilmate.service
+[Unit]
+Description=ScoilMate learning app (uvicorn)
+After=network.target
+Wants=network.target
+
+[Service]
+Type=simple
+User=scoilmate
+Group=scoilmate
+WorkingDirectory=/opt/scoilmate
+EnvironmentFile=/etc/scoilmate/scoilmate.env
+# Apply database migrations and import the reviewed/draft content file before serving. Both are idempotent.
+ExecStartPre=/opt/scoilmate/.venv/bin/python -m scoilmate.cli migrate
+ExecStartPre=/opt/scoilmate/.venv/bin/python -m scoilmate.cli import-content
+# Listen only on loopback: nginx is the only public entry point.
+# One worker: login rate limits are kept in memory per process, so keep a single process.
+# --proxy-headers trusts X-Forwarded-For/Proto from nginx only (127.0.0.1), so per-IP login limits see real clients.
+ExecStart=/opt/scoilmate/.venv/bin/python -m uvicorn scoilmate.app:app \
+    --host 127.0.0.1 --port 8000 \
+    --proxy-headers --forwarded-allow-ips 127.0.0.1 \
+    --no-server-header
+Restart=on-failure
+RestartSec=3
+
+# Hardening: read-only system, write access only to the database directory.
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+ReadWritePaths=/var/lib/scoilmate
+ProtectKernelTunables=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+
+[Install]
+WantedBy=multi-user.target

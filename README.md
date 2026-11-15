@@ -112,3 +112,7 @@ Checks validate JSON structure, unique identifiers, allowed subject/track/level 
 ## Local-only boundary
 
 Repository: `~/coding/scoilmate` (its own `.git`, independent of the surrounding workspace). GitHub, licence selection, domain, hosting, TLS, dependency lockfile, full learning-application implementation and any production deployment require a later decision. No open-source licence is selected merely by writing this plan; do not publish the materials before Dave decides licensing and the content is reviewed.
+
+## Server deployment
+
+Ubuntu install with uvicorn (systemd) behind nginx with HTTPS, and creating the first admin: see [docs/deploy-ubuntu.md](docs/deploy-ubuntu.md). Files are in `deploy/`: `install-ubuntu.sh`, `init-admin.sh`, `scoilmate.service`, `nginx.conf`, `scoilmate-proxy.conf`, `scoilmate.env.example`.
