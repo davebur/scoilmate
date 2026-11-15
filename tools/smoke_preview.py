@@ -18,7 +18,7 @@ with tempfile.TemporaryFile(mode='w+') as log:
                 if proc.poll() is not None: raise RuntimeError('Preview exited')
                 time.sleep(.1)
         else: raise RuntimeError('Preview did not become ready')
-        for path,expected in [('/',b'not ready for student use'),('/login',b'Log in'),('/practice',b'Log in'),('/static/branding/favicon.ico',None),('/static/branding/scoilmate-icon-192.png',None)]:
+        for path,expected in [('/',b'not ready for student use'),('/login',b'Log in'),('/practice',b'Log in'),('/wellbeing',b'50808'),('/admin/content',b'Log in'),('/static/branding/favicon.ico',None),('/static/branding/scoilmate-icon-192.png',None)]:
             with urllib.request.urlopen(f'http://127.0.0.1:{port}{path}',timeout=3) as r:
                 body=r.read(); assert r.status==200 and body
                 if expected: assert expected in body

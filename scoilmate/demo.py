@@ -45,6 +45,23 @@ def _set(db, student, kind, slugs, plan, days_ago, confidence=None, reflection=N
     db.flush()
 
 
+def _demo_ratings(db: Session):
+    """A few anonymous ratings so the admin ratings queue has something to show (only on an empty table)."""
+    from .models import ContentItem, ContentRating
+    if db.scalar(select(ContentRating.id).limit(1)):
+        return
+    plan = {'simile': [('down', 'unclear'), ('down', 'unclear'), ('up', 'helpful')],
+            'inference': [('down', 'wrong'), ('down', 'too_hard')], 'primary': [('up', None), ('down', 'too_easy')]}
+    for topic_slug, ratings in plan.items():
+        topic = _topic(db, topic_slug)
+        if topic is None:
+            continue
+        item = db.scalar(select(ContentItem).where(ContentItem.topic_id == topic.id, ContentItem.kind == 'question'))
+        version = content.current_version(item, include_drafts=True) if item else None
+        for rating, reason in ratings if version else []:
+            content.record_rating(db, version, rating, reason)
+
+
 def seed(db: Session, reset: bool = False) -> dict[str, str]:
     existing = db.scalars(select(User).where(User.login.in_(PASSWORDS))).all()
     if existing and not reset:
@@ -81,6 +98,7 @@ def seed(db: Session, reset: bool = False) -> dict[str, str]:
         _set(db, s2, 'topic', ['ga-time'], [(True, 0)], 2, confidence=1)
         for s in (s1, s2, s3):
             learning.refresh_cache(db, s.id)
+        _demo_ratings(db)
     finally:
         settings.allow_draft_practice = old
     return PASSWORDS
