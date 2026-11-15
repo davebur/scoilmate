@@ -1,0 +1,17 @@
+{% extends "base.html" %}{% block title %}Ratings review{% endblock %}
+{% block content %}
+<h1>Ratings review queue</h1>
+<p class="small">Anonymous 👍/👎 from students, one row per content version, most 👎 first, then by the most serious reason ("something is wrong" before "unclear"). Fix an item by editing it (a new version), reviewing and publishing; then mark its ratings resolved by that version.</p>
+<p>{% if show == 'all' %}<a href="/admin/ratings">Show open only</a>{% else %}<a href="/admin/ratings?show=all">Show resolved too</a>{% endif %}</p>
+<table><thead><tr><th scope="col">Item</th><th scope="col">👎</th><th scope="col">👍</th><th scope="col">👎 reasons</th><th scope="col">Last rating</th><th scope="col">Status</th></tr></thead><tbody>
+{% for r in rows %}<tr><td><a href="/admin/content/{{ r.v.item.slug }}?v={{ r.v.version }}">{{ r.v.item.slug }}</a> v{{ r.v.version }} <span class="small">({{ r.v.status }})</span><br><span class="small">{{ r.v.title }}</span></td>
+<td>{{ r.down }}</td><td>{{ r.up }}</td>
+<td class="small">{% for reason, n in r.reasons %}{{ REASONS[reason] }}: {{ n }}{{ '; ' if not loop.last }}{% else %}—{% endfor %}</td>
+<td class="small">{{ r.last|date }}</td>
+<td>{% if r.open %}<form method="post" action="/admin/ratings/{{ r.v.id }}/resolve">{% include "_csrf.html" %}
+<label class="small">Resolved by <select name="resolved_version"><option value="">no change needed</option>{% for x in r.later|reverse %}<option value="{{ x.version }}">version {{ x.version }} ({{ x.status }})</option>{% endfor %}</select></label>
+<button class="button secondary">Mark resolved</button></form>
+{% else %}<span class="thanks">Resolved{% if r.resolved_version %} by version {{ r.resolved_version }}{% else %}, no change needed{% endif %}</span><br><span class="small">{{ r.resolved_at|date }}</span>{% endif %}</td></tr>
+{% else %}<tr><td colspan="6">No {{ 'open ' if show != 'all' }}ratings.</td></tr>{% endfor %}
+</tbody></table>
+{% endblock %}

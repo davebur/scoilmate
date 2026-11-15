@@ -116,6 +116,7 @@ class ContentVersion(Base):
     reviewed_by: Mapped[str | None] = mapped_column(ForeignKey('user.id', ondelete='SET NULL'))
     reviewed_at: Mapped[datetime | None] = mapped_column(DateTime)
     review_note: Mapped[str | None] = mapped_column(String(500))
+    reviewer_name: Mapped[str | None] = mapped_column(String(80))  # the teacher who checked it (migration 0004)
     published_at: Mapped[datetime | None] = mapped_column(DateTime)
     retired_at: Mapped[datetime | None] = mapped_column(DateTime)
     item: Mapped[ContentItem] = relationship(back_populates='versions')
@@ -138,6 +139,7 @@ class ContentRating(Base):
     at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
     source_key: Mapped[str | None] = mapped_column(String(64), unique=True)  # dedupes JSONL imports
     resolved_at: Mapped[datetime | None] = mapped_column(DateTime)
+    resolved_version: Mapped[int | None] = mapped_column(Integer)  # "resolved by version N" (migration 0004)
 
 
 # ---------- attempts (pin exact versions) ----------

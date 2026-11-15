@@ -1,0 +1,13 @@
+{% extends "base.html" %}{% block title %}New {{ 'topic note' if kind == 'lesson' else 'question' }}{% endblock %}
+{% block content %}
+{% set lang = SUBJECTS[topic.subject].lang %}
+<p class="crumbs"><a href="/admin/content">Content</a> › {{ topic.title }} › New {{ 'topic note' if kind == 'lesson' else 'question' }}</p>
+<h1>New {{ 'topic note' if kind == 'lesson' else 'question' }}</h1>
+<p class="small">Saved as a <b>draft</b> (version 1). Students only see it once it is reviewed and published{% if draft_practice %}, or as a marked draft while draft practice is on{% endif %}. Write original material only; do not copy SEC papers or textbooks.</p>
+{% if error %}<p class="error" role="alert">{{ error }}</p>{% endif %}
+<form method="post" action="/admin/content/new" class="card">{% include "_csrf.html" %}
+<input type="hidden" name="kind" value="{{ kind }}"><input type="hidden" name="topic" value="{{ topic.slug }}">
+<label>Short id (slug) <input name="slug" value="{{ form.get('slug', '') }}" pattern="[a-z0-9][a-z0-9\-]{1,62}" maxlength="63" required></label>
+{% include "_content_fields.html" %}
+<button class="button">Save draft</button></form>
+{% endblock %}

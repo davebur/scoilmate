@@ -1,0 +1,16 @@
+{# editor fields; expects kind, form (dict of current values), lessons, letters, lang #}
+{% if kind == 'lesson' %}
+<label>Title <input name="title" value="{{ form.get('title', '') }}" maxlength="160" required lang="{{ lang }}"></label>
+<label>Note text (plain text; shown exactly as written, no HTML)<textarea name="body" rows="10" maxlength="5000" required lang="{{ lang }}">{{ form.get('body', '') }}</textarea></label>
+{% else %}
+<label>Question prompt <textarea name="prompt" rows="2" maxlength="300" required lang="{{ lang }}">{{ form.get('prompt', '') }}</textarea></label>
+<fieldset><legend>Options (3–5; leave unused ones blank) and the correct answer</legend>
+{% for L in letters %}<div class="subject-row"><label><input type="radio" name="correct_option_id" value="{{ L }}" {{ 'checked' if form.get('correct_option_id') == L }}> correct</label>
+<label>{{ L }} <input name="option_{{ L }}" value="{{ form.get('option_' ~ L, '') }}" maxlength="300" size="50" lang="{{ lang }}"></label></div>{% endfor %}
+</fieldset>
+<label>Explanation (why the answer is right, and why the tempting wrong options are wrong)<textarea name="explanation" rows="3" maxlength="5000" required lang="{{ lang }}">{{ form.get('explanation', '') }}</textarea></label>
+<fieldset><legend>Hints, revealed one at a time (1–3): nudge → strategy → eliminate an option</legend>
+{% for n in (1, 2, 3) %}<label>Hint {{ n }} <input name="hint_{{ n }}" value="{{ form.get('hint_' ~ n, '') }}" maxlength="500" size="60" lang="{{ lang }}" {{ 'required' if n == 1 }}></label>{% endfor %}
+</fieldset>
+<label>Topic note linked from the question <select name="help_lesson_id"><option value="">None</option>{% for l in lessons %}<option value="{{ l.slug }}" {{ 'selected' if form.get('help_lesson_id') == l.slug }}>{{ l.slug }}</option>{% endfor %}</select></label>
+{% endif %}

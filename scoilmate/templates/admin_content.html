@@ -1,0 +1,27 @@
+{% extends "base.html" %}{% block title %}Content{% endblock %}
+{% block content %}
+<h1>Content</h1>
+<p class="small">Workflow: <b>draft</b> → preview → <b>reviewed</b> (reviewer name, date, notes) → <b>published</b>. Every edit makes a new version; old versions never change, so past attempts still show exactly what the student saw. <b>Retire</b> takes an item out of new practice.
+{% if draft_practice %}<br><span class="amber">Draft practice is ON:</span> students can practise drafts (with a "draft, not teacher-reviewed" banner). Turn off with <code>SCOILMATE_ALLOW_DRAFT_PRACTICE=0</code>.{% else %}<br>Draft practice is off: students only see published content.{% endif %}</p>
+<p><a class="button secondary" href="/admin/ratings">Ratings review queue</a></p>
+{% for t in topics %}
+<section class="card">
+<h2 lang="{{ SUBJECTS[t.subject].lang }}">{{ t.title }}</h2>
+<p class="small">{{ SUBJECTS[t.subject].name }}{% if t.track != 'general' %} {{ TRACK_NAMES[t.track] }}{% endif %} · <code>{{ t.slug }}</code> ·
+<a href="/admin/content/new?kind=question&amp;topic={{ t.slug }}">Add question</a> · <a href="/admin/content/new?kind=lesson&amp;topic={{ t.slug }}">Add topic note</a></p>
+<table><thead><tr><th scope="col">Item</th><th scope="col">Type</th><th scope="col">Latest version</th><th scope="col">In practice</th></tr></thead><tbody>
+{% for row in by_topic[t.id] %}<tr><td><a href="/admin/content/{{ row.item.slug }}">{{ row.item.slug }}</a><br><span class="small" lang="{{ SUBJECTS[t.subject].lang }}">{{ row.latest.title }}</span></td>
+<td>{{ 'Topic note' if row.item.kind == 'lesson' else 'Question' }}</td>
+<td>v{{ row.latest.version }} <span class="st st-{{ row.latest.status }}">{{ row.latest.status }}</span></td>
+<td>{% if row.live %}v{{ row.live.version }} published{% elif row.latest.status == 'retired' %}retired{% else %}<span class="amber">draft only</span>{% endif %}</td></tr>
+{% else %}<tr><td colspan="4">Nothing yet.</td></tr>{% endfor %}
+</tbody></table>
+</section>
+{% endfor %}
+<form method="post" action="/admin/topics/new" class="card">{% include "_csrf.html" %}
+<h2>New topic</h2>
+<label>Subject <select name="strand" required>{% for s in strands %}<option value="{{ s.slug }}">{{ s.title }}</option>{% endfor %}</select></label>
+<label>Short id (slug) <input name="slug" pattern="[a-z0-9][a-z0-9\-]{1,62}" maxlength="63" required></label>
+<label>Title <input name="title" maxlength="160" required></label>
+<button class="button">Add topic</button></form>
+{% endblock %}

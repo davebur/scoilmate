@@ -1,0 +1,30 @@
+{% extends "base.html" %}{% block title %}Preview {{ item.slug }} v{{ v.version }}{% endblock %}
+{% block content %}
+<p class="crumbs"><a href="/admin/content">Content</a> › <a href="/admin/content/{{ item.slug }}?v={{ v.version }}">{{ item.slug }} v{{ v.version }}</a> › Student preview</p>
+<p class="notice">Admin preview of <b>v{{ v.version }}</b> ({{ v.status }}). This is what a student sees; nothing you do here is recorded.</p>
+{% with draft=v.status != 'published' %}{% include "_draft.html" %}{% endwith %}
+{% if item.kind == 'lesson' %}
+<article class="lesson" lang="{{ lang }}"><h1>{{ v.data.title }}</h1><p>{{ v.data.body }}</p></article>
+{% else %}
+<form method="post" action="/admin/content/{{ item.slug }}/v/{{ v.version }}/preview" class="question" lang="{{ lang }}">{% include "_csrf.html" %}
+<fieldset><legend><span class="qn" lang="en">Question</span> {{ q.prompt }}</legend>
+{% if error %}<p class="error" role="alert" lang="en">{{ error }}</p>{% endif %}
+{% for o in q.options %}<label class="option"><input type="radio" name="option" value="{{ o.id }}" {{ 'checked' if result and result.chosen == o.id }}> <b>{{ o.id }}</b> {{ o.text }}</label>{% endfor %}
+</fieldset>
+<button class="button" lang="en">Check answer</button>
+</form>
+<section class="hints" aria-label="Hints">
+<p class="small">Students reveal these one at a time with "Stuck? Show a hint".</p>
+{% for h in q.hints %}<details><summary>Hint {{ loop.index }}</summary><p class="hint" lang="{{ lang }}">{{ h }}</p></details>{% endfor %}
+</section>
+{% if result %}
+<section class="result {{ 'ok' if result.correct else 'review' }}" role="status">
+<h2>{% if result.correct %}Correct{% else %}Not this time{% endif %}</h2>
+{% if not result.correct %}<p>You chose <b>{{ result.chosen }}</b>: <span lang="{{ lang }}">{{ result.chosen_text }}</span></p>{% endif %}
+<p>Answer: <b>{{ result.correct_option_id }}</b>: <span lang="{{ lang }}">{{ result.correct_text }}</span></p>
+<p class="why" lang="{{ lang }}"><b lang="en">Why:</b> {{ result.explanation }}</p>
+</section>
+{% endif %}
+{% endif %}
+<p><a class="button secondary" href="/admin/content/{{ item.slug }}?v={{ v.version }}">Back to the editor</a></p>
+{% endblock %}

@@ -13,7 +13,7 @@ Revised 2026-11-14 with Dave: deliver a clickable learning loop first, then add 
 | 4 | Storage: SQLite + SQLAlchemy + Alembic for content, attempts, ratings | **Done** (`tools/test_storage.py`) |
 | 5 | Accounts: admin, **parent** and student roles, sessions, CSRF; admins add/remove students and parents; parents add and manage their own children | **Done** (`tools/test_accounts.py`) |
 | 6 | Reports: **student "My progress"**, **parent view of each linked child**, **admin per-student and class reports** | **Done** (`tools/test_learning.py`) |
-| 7 | Admin content authoring/review/publish; ratings review queue; more content | Planned |
+| 7 | Admin content authoring/review/publish; ratings review queue; wellbeing page | **Done** (`tools/test_content_workflow.py`); more reviewed content still needs teachers |
 | 8 | Privacy/safeguarding sign-off and pilot release gate | Planned |
 
 ## Feature set from research
@@ -81,9 +81,10 @@ What students and admins get, and why. Sources: common features across 18 tools,
 - Reports cover every activity type added later (quizzes, lessons read, revisit sessions, future writing/self-assessment tasks) through a common activity log, so new approaches appear without redesign.
 - Deterministic: report rebuilt from attempts equals cached figures.
 
-**Step 7 — content workflow**
+**Step 7 — content workflow (done)**
 - Draft invisible to students; publish requires review; edit creates new version; retired versions excluded from new quizzes, old attempts still render.
 - Ratings queue: items sorted by 👎 and reason; admin can mark resolved with new version.
+- As built: admins create topics, questions (3–5 options, 1–3 hints, explanation, linked note) and topic notes as drafts; "Preview as a student" shows and grades a version without recording anything; a review records reviewer name, date and notes; only reviewed versions can be published, and publishing retires older versions. Every edit inserts a new version (DB trigger blocks changes to saved text). Retire removes the item from new practice; old attempts still render the pinned version. `SCOILMATE_ALLOW_DRAFT_PRACTICE` (on in `run_local_testing`, off otherwise) lets students practise drafts behind a "Draft, not teacher-reviewed" banner. Ratings queue at `/admin/ratings`: most 👎 first, then by most serious reason (wrong > unclear > too hard > too easy); "resolved by version N" or "no change needed". Public `/wellbeing` page links the gov.ie exam wellbeing page, Jigsaw, spunout/Text About It (50808), Childline and Samaritans (links checked 2026-11-15). Tests: admin-only access for every content route, validation, versioning, retire, preview records nothing, XSS escaping of authored content on admin and student pages, queue order and resolution.
 
 **Step 8 — pilot gate**
 - 30-concurrent burst; no lost responses; 429 rate limits; XSS/IDOR/CSRF checks; restore drill; export/erase; accessibility and manual Gaeilge checks; DPIA screening and notices approved.

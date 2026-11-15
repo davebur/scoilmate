@@ -17,6 +17,7 @@ from .auth import LoginRequired
 from .config import settings
 from .db import get_db
 from .views_accounts import router as accounts_router
+from .views_content import router as content_router
 from .views_learning import router as learning_router
 from .web import PKG, render
 
@@ -30,6 +31,7 @@ app.mount('/static/branding', StaticFiles(directory=ROOT / 'assets' / 'branding'
 app.mount('/static/app', StaticFiles(directory=PKG / 'static'), name='appstatic')
 app.include_router(accounts_router)
 app.include_router(learning_router)
+app.include_router(content_router)
 
 
 @app.middleware('http')

@@ -1,0 +1,52 @@
+{% extends "base.html" %}{% block title %}{{ item.slug }}{% endblock %}
+{% block content %}
+<p class="crumbs"><a href="/admin/content">Content</a> › {{ item.topic.title }} › {{ item.slug }}</p>
+<h1>{{ item.slug }} <span class="small">({{ 'topic note' if item.kind == 'lesson' else 'question' }})</span></h1>
+{% if request.query_params.get('unchanged') %}<p class="notice" role="status">No changes, so no new version was made.</p>{% endif %}
+{% if error %}<p class="error" role="alert">{{ error }}</p>{% endif %}
+<p>{% if live %}Students practise <b>v{{ live.version }}</b> (published).{% elif item.versions[-1].status == 'retired' %}<b>Retired:</b> not offered in new practice. Past attempts still show the version the student saw.{% else %}<span class="amber">Not published yet.</span>{% if draft_practice %} Draft practice is on, so students see the newest draft with a "draft" banner.{% endif %}{% endif %}</p>
+
+<table><caption>Versions (each one is fixed once saved)</caption><thead><tr><th scope="col">Version</th><th scope="col">Status</th><th scope="col">Written</th><th scope="col">Review</th><th scope="col">👎</th></tr></thead><tbody>
+{% for x in item.versions|reverse %}<tr{% if x.id == shown.id %} aria-current="true" class="current"{% endif %}><td><a href="/admin/content/{{ item.slug }}?v={{ x.version }}">v{{ x.version }}</a></td><td>{{ x.status }}{% if x.published_at %}<br><span class="small">published {{ x.published_at|date }}</span>{% endif %}{% if x.retired_at %}<br><span class="small">retired {{ x.retired_at|date }}</span>{% endif %}</td>
+<td>{{ x.created_at|date }}</td>
+<td>{% if x.reviewed_at %}{{ x.reviewer_name or '—' }}, {{ x.reviewed_at|date }}<br><span class="small">{{ x.review_note }}</span>{% else %}—{% endif %}</td>
+<td>{{ downs.get(x.id, 0) }}</td></tr>{% endfor %}
+</tbody></table>
+
+<section class="card"><h2>Version {{ shown.version }} <span class="small">({{ shown.status }})</span></h2>
+<p><a class="button secondary" href="/admin/content/{{ item.slug }}/v/{{ shown.version }}/preview">Preview as a student</a></p>
+{% if item.kind == 'lesson' %}
+<article class="lesson" lang="{{ lang }}"><h3>{{ data.title }}</h3><p>{{ data.body }}</p></article>
+{% else %}
+<p lang="{{ lang }}"><b>{{ data.prompt }}</b></p>
+<ul>{% for o in data.options %}<li lang="{{ lang }}"><b>{{ o.id }}</b> {{ o.text }}{% if o.id == data.correct_option_id %} <span class="thanks" lang="en">✓ correct</span>{% endif %}</li>{% endfor %}</ul>
+<p class="why" lang="{{ lang }}"><b lang="en">Explanation:</b> {{ data.explanation }}</p>
+<ol>{% for h in data.hints %}<li class="hint" lang="{{ lang }}">{{ h }}</li>{% endfor %}</ol>
+<p class="small">Topic note: {{ data.help_lesson_id or 'none' }}{% if data.provenance %} · {{ data.provenance }}{% endif %}</p>
+{% endif %}
+
+{% if shown.status == 'draft' %}
+<form method="post" action="/admin/content/{{ item.slug }}/v/{{ shown.version }}/review" class="card">{% include "_csrf.html" %}
+<h3>Record a review</h3>
+<p class="small">Preview it first. The reviewer (e.g. the subject teacher) checks accuracy, level, wording{% if lang == 'ga' %}, and the Irish (spelling, grammar, dialect){% endif %}.</p>
+<label>Reviewer's name <input name="reviewer_name" maxlength="80" required></label>
+<label>Date reviewed <input type="date" name="review_date" value="{{ today }}" max="{{ today }}" required></label>
+<label>Notes: what was checked <textarea name="note" rows="2" maxlength="500" required></textarea></label>
+<button class="button">Mark as reviewed</button></form>
+{% elif shown.status == 'reviewed' %}
+<form method="post" action="/admin/content/{{ item.slug }}/v/{{ shown.version }}/publish" class="inline">{% include "_csrf.html" %}<button class="button">Publish v{{ shown.version }}</button></form>
+<span class="small">Publishing replaces any earlier version in new practice.</span>
+{% endif %}
+</section>
+
+{% if item.versions[-1].status != 'retired' %}
+<form method="post" action="/admin/content/{{ item.slug }}/retire" class="card">{% include "_csrf.html" %}
+<h2>Retire</h2><p class="small">Stops offering this item in new practice. Past attempts and reports keep showing the version the student saw. Saving a new edit later starts a fresh draft.</p>
+<button class="button danger">Retire {{ item.slug }}</button></form>
+{% endif %}
+
+<form method="post" action="/admin/content/{{ item.slug }}/edit" class="card">{% include "_csrf.html" %}
+<h2>Edit (saves v{{ item.versions[-1].version + 1 }} as a draft)</h2>
+{% with kind=item.kind %}{% include "_content_fields.html" %}{% endwith %}
+<button class="button">Save new version</button></form>
+{% endblock %}
