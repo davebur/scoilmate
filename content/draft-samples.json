@@ -134,6 +134,16 @@
       "track": "general",
       "title": "Poetry: keep a short theme and image bank for studied poems",
       "body": "For each studied poem, write in your own words: the main theme, three images with the line each comes from, one device you noticed, and the feeling you think the poet wants the reader to have. Keep the bank short enough to revise in ten minutes. Use it to plan answers to theme prompts, which may ask about a studied poem in a new way. Your teacher's list decides which poems you study; ScoilMate does not reproduce published poems."
+    },
+    {
+      "id": "lesson-poetry-tone",
+      "version": 1,
+      "status": "draft",
+      "review_status": "unreviewed",
+      "subject": "english",
+      "track": "general",
+      "title": "Poetry: tone and the speaker's feeling",
+      "body": "Tone is the attitude the poem takes, shown through word choice, rhythm and what is left unsaid. Tone words include weary, hopeful, angry, tender and lonely. Before you name a tone, test it: choose one word, then find two words or images from the poem that support it. If you cannot find evidence, choose another word. Speaker and poet are not always the same, so answer about the speaker's feeling when the question asks for it."
     }
   ],
   "questions": [
@@ -790,6 +800,147 @@
         "Look for an answer with a point, a quote and an explanation."
       ],
       "help_lesson_id": "lesson-poetry-pqe",
+      "provenance": "Original ScoilMate draft written for this app; not copied from a published poem or an examination paper."
+    },
+    {
+      "id": "q-poetry-tone",
+      "version": 1,
+      "status": "draft",
+      "review_status": "unreviewed",
+      "subject": "english",
+      "track": "general",
+      "language": "en",
+      "year_guidance": [
+        1,
+        2,
+        3
+      ],
+      "levels": [
+        "ordinary",
+        "higher"
+      ],
+      "strand": "Reading",
+      "outcome_mapping_status": "candidate_unreviewed",
+      "prompt": "Read this original poem:\nNobody sits on the bench since the advert went up, / the glass is cracked and the timetable has faded to blue. / Still I wait here, counting the buses that do not come, / the way you count the stairs in a house you have left.\nWhich word best describes the tone?",
+      "options": [
+        {
+          "id": "A",
+          "text": "cheerful"
+        },
+        {
+          "id": "B",
+          "text": "weary"
+        },
+        {
+          "id": "C",
+          "text": "furious"
+        },
+        {
+          "id": "D",
+          "text": "playful"
+        }
+      ],
+      "correct_option_id": "B",
+      "explanation": "'Faded', 'do not come' and 'left' show tiredness and a sense of waiting without reward.",
+      "hints": [
+        "Look at words such as 'faded', 'cracked' and 'do not come'.",
+        "Which word fits a speaker who is tired of waiting?"
+      ],
+      "help_lesson_id": "lesson-poetry-tone",
+      "provenance": "Original ScoilMate draft written for this app; not copied from a published poem or an examination paper."
+    },
+    {
+      "id": "q-poetry-imagery",
+      "version": 1,
+      "status": "draft",
+      "review_status": "unreviewed",
+      "subject": "english",
+      "track": "general",
+      "language": "en",
+      "year_guidance": [
+        1,
+        2,
+        3
+      ],
+      "levels": [
+        "ordinary",
+        "higher"
+      ],
+      "strand": "Reading",
+      "outcome_mapping_status": "candidate_unreviewed",
+      "prompt": "Read this original poem:\nThe river keeps its coat of ice until March, / then gives it back in small bright plates on the brown water.\nWhat does 'coat of ice' most suggest?",
+      "options": [
+        {
+          "id": "A",
+          "text": "The ice is dirty and unwanted."
+        },
+        {
+          "id": "B",
+          "text": "The river is covered as if wrapped up for winter."
+        },
+        {
+          "id": "C",
+          "text": "The river is warm in summer."
+        },
+        {
+          "id": "D",
+          "text": "The ice is part of a school uniform."
+        }
+      ],
+      "correct_option_id": "B",
+      "explanation": "The metaphor of a coat suggests the river is wrapped and protected by ice through winter.",
+      "hints": [
+        "A coat keeps something warm and covered. What is the river wrapped in?",
+        "Which choice explains the image rather than repeating the words?"
+      ],
+      "help_lesson_id": "lesson-poetry-devices",
+      "provenance": "Original ScoilMate draft written for this app; not copied from a published poem or an examination paper."
+    },
+    {
+      "id": "q-poetry-speaker-feeling",
+      "version": 1,
+      "status": "draft",
+      "review_status": "unreviewed",
+      "subject": "english",
+      "track": "general",
+      "language": "en",
+      "year_guidance": [
+        1,
+        2,
+        3
+      ],
+      "levels": [
+        "ordinary",
+        "higher"
+      ],
+      "strand": "Reading",
+      "outcome_mapping_status": "candidate_unreviewed",
+      "prompt": "Read this original poem:\nYou never left the light on for me, / yet I walk home each night towards the window / that is always dark.\nWhich word best describes the speaker's feeling?",
+      "options": [
+        {
+          "id": "A",
+          "text": "relieved"
+        },
+        {
+          "id": "B",
+          "text": "excited"
+        },
+        {
+          "id": "C",
+          "text": "lonely"
+        },
+        {
+          "id": "D",
+          "text": "bored"
+        }
+      ],
+      "correct_option_id": "C",
+      "explanation": "The light is never on and the speaker keeps going back to a dark window, which suggests loneliness.",
+      "hints": [
+        "Focus on the image of the dark window.",
+        "Find one line that shows the speaker is left waiting."
+      ],
+      "help_lesson_id": "lesson-poetry-tone",
       "provenance": "Original ScoilMate draft written for this app; not copied from a published poem or an examination paper."
     }
   ]

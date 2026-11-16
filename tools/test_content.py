@@ -13,7 +13,7 @@ class ContentTests(unittest.TestCase):
         )
 
     def test_valid(self):
-        self.assertEqual(validate(self.data), (13, 14))
+        self.assertEqual(validate(self.data), (14, 17))
 
     def test_reject_mutations(self):
         mutations = [
