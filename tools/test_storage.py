@@ -84,8 +84,8 @@ class StorageTests(unittest.TestCase):
         self.assertEqual(tables - {"alembic_version"}, set())
         db.migrate()
         with db.session_scope() as s:
-            self.assertEqual(content.import_json(s), (18, 0))
-            self.assertEqual(s.scalar(select(func.count()).select_from(ContentVersion)), 18)
+            self.assertEqual(content.import_json(s), (27, 0))
+            self.assertEqual(s.scalar(select(func.count()).select_from(ContentVersion)), 27)
 
     def test_versions_immutable_and_new_versions_allowed(self):
         with db.session_scope() as s:
@@ -112,9 +112,9 @@ class StorageTests(unittest.TestCase):
 
     def test_import_idempotent_and_rejects_silent_edits(self):
         with db.session_scope() as s:
-            self.assertEqual(content.import_json(s), (0, 18))
+            self.assertEqual(content.import_json(s), (0, 27))
             topics = s.scalars(select(Topic)).all()
-            self.assertEqual(len(topics), 9)
+            self.assertEqual(len(topics), 13)
             self.assertTrue(all(i.topic_id for i in s.scalars(select(ContentItem))))
             self.assertEqual({v.status for v in s.scalars(select(ContentVersion))}, {"draft"})
         data = json.loads(content.CONTENT_FILE.read_text())
@@ -127,7 +127,7 @@ class StorageTests(unittest.TestCase):
         data["questions"][0]["version"] = 2
         changed.write_text(json.dumps(data))
         with db.session_scope() as s:
-            self.assertEqual(content.import_json(s, changed), (1, 17))
+            self.assertEqual(content.import_json(s, changed), (1, 26))
 
     def test_attempts_pin_versions(self):
         with db.session_scope() as s:
@@ -197,7 +197,7 @@ class StorageTests(unittest.TestCase):
         with db.session_scope() as s:
             logins = set(s.scalars(select(User.login)))
             self.assertEqual(logins, {"before-backup"})
-            self.assertEqual(s.scalar(select(func.count()).select_from(ContentVersion)), 18)
+            self.assertEqual(s.scalar(select(func.count()).select_from(ContentVersion)), 27)
             self.assertEqual(s.execute(text("PRAGMA integrity_check")).scalar(), "ok")
 
     def test_restore_rejects_corrupt_file(self):
@@ -206,7 +206,7 @@ class StorageTests(unittest.TestCase):
         with self.assertRaises(sqlite3.DatabaseError):
             db.restore(bad)
         with db.session_scope() as s:  # live DB untouched
-            self.assertEqual(s.scalar(select(func.count()).select_from(ContentVersion)), 18)
+            self.assertEqual(s.scalar(select(func.count()).select_from(ContentVersion)), 27)
 
 
 if __name__ == "__main__":

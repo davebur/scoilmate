@@ -94,6 +94,46 @@
       "track": "general",
       "title": "Change and continuity",
       "body": "Change means something became different; continuity means something persisted across a period. Both can appear together."
+    },
+    {
+      "id": "lesson-poetry-first-read",
+      "version": 1,
+      "status": "draft",
+      "review_status": "unreviewed",
+      "subject": "english",
+      "track": "general",
+      "title": "Poetry: the first read of an unseen poem",
+      "body": "Read the poem twice before you answer. On the first read, work out who is speaking, who or what they are speaking to, and what is happening. On the second read, note repeated words, images, and any change of mood between the first and last lines. You should be able to say what the poem is about in one sentence before you write anything."
+    },
+    {
+      "id": "lesson-poetry-devices",
+      "version": 1,
+      "status": "draft",
+      "review_status": "unreviewed",
+      "subject": "english",
+      "track": "general",
+      "title": "Poetry: poetic devices and what they do",
+      "body": "Name the device, then say what it makes the reader see or feel. A simile compares two things using like or as. A metaphor says one thing is another. Personification gives human qualities to something that is not human. Imagery uses the senses. Alliteration repeats starting sounds. Enjambment carries a sentence over a line break, so the reader keeps going. Example (original): My father comes home when the streetlights are already on, / his boots loud on the step like a clock that won't stop. The simile 'like a clock' makes the footsteps sound regular and unwelcome, as if time at home is being counted."
+    },
+    {
+      "id": "lesson-poetry-pqe",
+      "version": 1,
+      "status": "draft",
+      "review_status": "unreviewed",
+      "subject": "english",
+      "track": "general",
+      "title": "Poetry: answering with Point, Quote, Explain",
+      "body": "Point: answer the question in one clear sentence. Quote: choose a short phrase from the poem and copy it exactly. Explain: say what the word choice shows and why it matters to the poem's meaning. Use 'suggests' for an interpretation, because a poem can support more than one reading. In a short answer, write two or three paragraphs, each about a different device or idea. Check each paragraph: does it use the poem's own words, not only your opinion?"
+    },
+    {
+      "id": "lesson-poetry-studied",
+      "version": 1,
+      "status": "draft",
+      "review_status": "unreviewed",
+      "subject": "english",
+      "track": "general",
+      "title": "Poetry: keep a short theme and image bank for studied poems",
+      "body": "For each studied poem, write in your own words: the main theme, three images with the line each comes from, one device you noticed, and the feeling you think the poet wants the reader to have. Keep the bank short enough to revise in ten minutes. Use it to plan answers to theme prompts, which may ask about a studied poem in a new way. Your teacher's list decides which poems you study; ScoilMate does not reproduce published poems."
     }
   ],
   "questions": [
@@ -516,6 +556,241 @@
       ],
       "help_lesson_id": "lesson-continuity",
       "provenance": "Original ScoilMate draft; not copied or adapted from an examination paper."
+    },
+    {
+      "id": "q-poetry-first-read",
+      "version": 1,
+      "status": "draft",
+      "review_status": "unreviewed",
+      "subject": "english",
+      "track": "general",
+      "language": "en",
+      "year_guidance": [
+        1,
+        2,
+        3
+      ],
+      "levels": [
+        "ordinary",
+        "higher"
+      ],
+      "strand": "Reading",
+      "outcome_mapping_status": "candidate_unreviewed",
+      "prompt": "When you first read an unseen poem, what should you work out first?",
+      "options": [
+        {
+          "id": "A",
+          "text": "The exact year the poem was written."
+        },
+        {
+          "id": "B",
+          "text": "Who is speaking, to whom, and what is happening."
+        },
+        {
+          "id": "C",
+          "text": "How many words rhyme with 'home'."
+        },
+        {
+          "id": "D",
+          "text": "Whether you personally like the poem."
+        }
+      ],
+      "correct_option_id": "B",
+      "explanation": "The first read is about the basic situation. It gives you what you need to say what the poem is about.",
+      "hints": [
+        "Start with the basics: the speaker, the listener and the situation.",
+        "Which choice helps you say what the poem is about?"
+      ],
+      "help_lesson_id": "lesson-poetry-first-read",
+      "provenance": "Original ScoilMate draft written for this app; not copied from a published poem or an examination paper."
+    },
+    {
+      "id": "q-poetry-simile",
+      "version": 1,
+      "status": "draft",
+      "review_status": "unreviewed",
+      "subject": "english",
+      "track": "general",
+      "language": "en",
+      "year_guidance": [
+        1,
+        2,
+        3
+      ],
+      "levels": [
+        "ordinary",
+        "higher"
+      ],
+      "strand": "Reading",
+      "outcome_mapping_status": "candidate_unreviewed",
+      "prompt": "Which line from the example contains a simile?",
+      "options": [
+        {
+          "id": "A",
+          "text": "My father comes home when the streetlights are already on,"
+        },
+        {
+          "id": "B",
+          "text": "his boots loud on the step like a clock that won't stop."
+        },
+        {
+          "id": "C",
+          "text": "The streetlights are already on."
+        },
+        {
+          "id": "D",
+          "text": "My father is often late."
+        }
+      ],
+      "correct_option_id": "B",
+      "explanation": "'Like a clock' compares the boots to a clock using 'like', so it is a simile.",
+      "hints": [
+        "Look for a comparison that uses the word like or as.",
+        "Which line compares the boots to something else?"
+      ],
+      "help_lesson_id": "lesson-poetry-devices",
+      "provenance": "Original ScoilMate draft written for this app; not copied from a published poem or an examination paper."
+    },
+    {
+      "id": "q-poetry-enjambment",
+      "version": 1,
+      "status": "draft",
+      "review_status": "unreviewed",
+      "subject": "english",
+      "track": "general",
+      "language": "en",
+      "year_guidance": [
+        1,
+        2,
+        3
+      ],
+      "levels": [
+        "ordinary",
+        "higher"
+      ],
+      "strand": "Reading",
+      "outcome_mapping_status": "candidate_unreviewed",
+      "prompt": "In the example, the first line ends with 'already on,' and the sentence carries on into the next line. What is this called?",
+      "options": [
+        {
+          "id": "A",
+          "text": "A rhyme between two lines."
+        },
+        {
+          "id": "B",
+          "text": "Enjambment: the sentence runs over the line break."
+        },
+        {
+          "id": "C",
+          "text": "A sudden change of mood."
+        },
+        {
+          "id": "D",
+          "text": "A spelling choice by the poet."
+        }
+      ],
+      "correct_option_id": "B",
+      "explanation": "Enjambment means the sentence continues past the end of a line, so the reader keeps moving forward.",
+      "hints": [
+        "Look at whether the sentence finishes at the end of the line.",
+        "Which choice describes a sentence that continues onto the next line?"
+      ],
+      "help_lesson_id": "lesson-poetry-devices",
+      "provenance": "Original ScoilMate draft written for this app; not copied from a published poem or an examination paper."
+    },
+    {
+      "id": "q-poetry-personification",
+      "version": 1,
+      "status": "draft",
+      "review_status": "unreviewed",
+      "subject": "english",
+      "track": "general",
+      "language": "en",
+      "year_guidance": [
+        1,
+        2,
+        3
+      ],
+      "levels": [
+        "ordinary",
+        "higher"
+      ],
+      "strand": "Reading",
+      "outcome_mapping_status": "candidate_unreviewed",
+      "prompt": "An original poem says: 'The canal holds its breath all winter.' Which device is 'holds its breath'?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Alliteration"
+        },
+        {
+          "id": "B",
+          "text": "Personification"
+        },
+        {
+          "id": "C",
+          "text": "Enjambment"
+        },
+        {
+          "id": "D",
+          "text": "A simile"
+        }
+      ],
+      "correct_option_id": "B",
+      "explanation": "A canal cannot breathe, so the poet gives it a human action. That is personification.",
+      "hints": [
+        "Is a human action being given to something that is not human?",
+        "Which device gives human qualities to a thing?"
+      ],
+      "help_lesson_id": "lesson-poetry-devices",
+      "provenance": "Original ScoilMate draft written for this app; not copied from a published poem or an examination paper."
+    },
+    {
+      "id": "q-poetry-pqe",
+      "version": 1,
+      "status": "draft",
+      "review_status": "unreviewed",
+      "subject": "english",
+      "track": "general",
+      "language": "en",
+      "year_guidance": [
+        1,
+        2,
+        3
+      ],
+      "levels": [
+        "ordinary",
+        "higher"
+      ],
+      "strand": "Reading",
+      "outcome_mapping_status": "candidate_unreviewed",
+      "prompt": "Which answer to 'How does the poet show the father's return is noticed?' follows Point, Quote, Explain best?",
+      "options": [
+        {
+          "id": "A",
+          "text": "This poem is about a father. I liked it."
+        },
+        {
+          "id": "B",
+          "text": "The poet uses 'loud' and 'clock' to show that his arrival is a noise that cannot be ignored, which suggests a home where time is watched closely."
+        },
+        {
+          "id": "C",
+          "text": "The poem is written in two lines."
+        },
+        {
+          "id": "D",
+          "text": "Poems are hard to read."
+        }
+      ],
+      "correct_option_id": "B",
+      "explanation": "It makes a point, quotes the poem's own words, and explains what the words suggest.",
+      "hints": [
+        "Which answer uses words from the poem itself?",
+        "Look for an answer with a point, a quote and an explanation."
+      ],
+      "help_lesson_id": "lesson-poetry-pqe",
+      "provenance": "Original ScoilMate draft written for this app; not copied from a published poem or an examination paper."
     }
   ]
 }

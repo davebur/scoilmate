@@ -50,12 +50,11 @@ def validate(data):
             "help reference",
         )
     need(
-        len(questions) == 9
-        and all(
-            sum(q["subject"] == s for q in questions) == 3
+        all(
+            sum(q["subject"] == s for q in questions) >= 3
             for s in ("english", "gaeilge", "history")
         ),
-        "sample coverage",
+        "sample coverage: at least three questions per subject",
     )
     return len(lessons), len(questions)
 
